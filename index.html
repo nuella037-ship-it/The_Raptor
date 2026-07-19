@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>John Doe | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">JD<span>.</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html" class="active">Home</a>
+                <a href="about.html">About</a>
+                <a href="projects.html">Projects</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="section-label">Welcome to my world</div>
+                <h1>Hi, I'm <span class="highlight">John Doe</span></h1>
+                <div class="typing-wrapper">
+                    <span class="typed-text" id="typedText">Full-Stack Developer</span>
+                    <span class="cursor">|</span>
+                </div>
+                <p>
+                    I craft beautiful, functional, and user-centric digital experiences.
+                    Specializing in modern web technologies and creative problem-solving.
+                </p>
+                <div class="hero-buttons">
+                    <a href="projects.html" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i> View My Work
+                    </a>
+                    <a href="contact.html" class="btn btn-outline">
+                        <i class="fas fa-paper-plane"></i> Contact Me
+                    </a>
+                </div>
+                <div class="hero-social">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="avatar-wrapper">
+                    <div class="avatar">
+                        <i class="fas fa-user-astronaut"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURED PROJECTS (Preview) -->
+    <section class="featured" style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 0;">
+        <div class="container">
+            <div class="section-header center">
+                <div class="section-label">Portfolio</div>
+                <h2 class="section-title">Featured <span class="highlight">Projects</span></h2>
+                <p class="section-desc">A selection of my recent work that showcases my skills and creativity.</p>
+            </div>
+            <div class="projects-grid" id="featuredGrid">
+                <!-- Injected via JS -->
+            </div>
+            <div style="text-align:center;margin-top:40px;">
+                <a href="projects.html" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View All Projects</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS (Preview) -->
+    <section style="padding:80px 0;">
+        <div class="container">
+            <div class="section-header center">
+                <div class="section-label">Testimonials</div>
+                <h2 class="section-title">What People <span class="highlight">Say</span></h2>
+                <p class="section-desc">Kind words from clients and colleagues I've had the pleasure to work with.</p>
+            </div>
+            <div class="testimonials-grid" id="testimonialsGrid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="copy">&copy; 2026 John Doe. Built with <i class="fas fa-heart" style="color:var(--accent);"></i></div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
