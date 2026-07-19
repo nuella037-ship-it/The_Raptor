@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>John Doe | About</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">JD<span>.</span></a>
+            <nav class="nav-links" id="navLinks">
+                <a href="index.html">Home</a>
+                <a href="about.html" class="active">About</a>
+                <a href="projects.html">Projects</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ABOUT HERO -->
+    <section style="padding:calc(var(--header-height) + 40px) 0 60px;">
+        <div class="container">
+            <div class="section-header center">
+                <div class="section-label">About Me</div>
+                <h2 class="section-title">Who <span class="highlight">I Am</span></h2>
+                <p class="section-desc">A quick look at my journey, skills, and the value I bring to every project.</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-text">
+                    <p>
+                        I'm a passionate Full-Stack Developer with 5+ years of experience building
+                        web applications that solve real problems. I believe in writing clean,
+                        maintainable code and creating interfaces that people love to use.
+                    </p>
+                    <p>
+                        My journey started with a fascination for how things work on the web,
+                        and it evolved into a career where I get to build things that matter.
+                        I work across the entire stack — from designing intuitive UIs to
+                        architecting robust backends.
+                    </p>
+                    <div class="about-stats">
+                        <div class="stat-item">
+                            <div class="number">5+</div>
+                            <div class="label">Years Experience</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number">50+</div>
+                            <div class="label">Projects Delivered</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="number">30+</div>
+                            <div class="label">Happy Clients</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="img-placeholder">
+                        <i class="fas fa-code"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SKILLS -->
+    <section style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 0;">
+        <div class="container">
+            <div class="section-header center">
+                <div class="section-label">My Arsenal</div>
+                <h2 class="section-title">Tech <span class="highlight">Skills</span></h2>
+                <p class="section-desc">Tools and technologies I work with daily to bring ideas to life.</p>
+            </div>
+            <div class="skills-grid" id="skillsGrid">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="copy">&copy; 2026 John Doe. Built with <i class="fas fa-heart" style="color:var(--accent);"></i></div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
