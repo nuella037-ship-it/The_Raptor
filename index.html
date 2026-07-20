@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>John Doe | Home</title>
+    <title>Tory Pulse – Latest News</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -13,12 +13,14 @@
     <!-- HEADER -->
     <header class="header">
         <div class="container">
-            <a href="index.html" class="logo">JD<span>.</span></a>
+            <a href="index.html" class="logo">Tory<span>Pulse</span></a>
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
-                <a href="about.html">About</a>
-                <a href="projects.html">Projects</a>
-                <a href="contact.html">Contact</a>
+                <a href="#local">Local</a>
+                <a href="#international">International</a>
+                <a href="#tech">Tech</a>
+                <a href="#health">Health</a>
+                <a href="#sports">Sports</a>
             </nav>
             <div style="display:flex;align-items:center;gap:6px;">
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -27,86 +29,62 @@
         </div>
     </header>
 
-    <!-- HERO -->
-    <section class="hero">
+    <!-- MAIN CONTENT -->
+    <main style="padding:calc(var(--header-height) + 40px) 0 60px;">
         <div class="container">
-            <div class="hero-content">
-                <div class="section-label">Welcome to my world</div>
-                <h1>Hi, I'm <span class="highlight">John Doe</span></h1>
-                <div class="typing-wrapper">
-                    <span class="typed-text" id="typedText">Full-Stack Developer</span>
-                    <span class="cursor">|</span>
-                </div>
-                <p>
-                    I craft beautiful, functional, and user-centric digital experiences.
-                    Specializing in modern web technologies and creative problem-solving.
-                </p>
-                <div class="hero-buttons">
-                    <a href="projects.html" class="btn btn-primary">
-                        <i class="fas fa-rocket"></i> View My Work
-                    </a>
-                    <a href="contact.html" class="btn btn-outline">
-                        <i class="fas fa-paper-plane"></i> Contact Me
-                    </a>
-                </div>
-                <div class="hero-social">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                </div>
-            </div>
-            <div class="hero-image">
-                <div class="avatar-wrapper">
-                    <div class="avatar">
-                        <i class="fas fa-user-astronaut"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- FEATURED PROJECTS (Preview) -->
-    <section class="featured" style="background:var(--bg-card);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:80px 0;">
-        <div class="container">
-            <div class="section-header center">
-                <div class="section-label">Portfolio</div>
-                <h2 class="section-title">Featured <span class="highlight">Projects</span></h2>
-                <p class="section-desc">A selection of my recent work that showcases my skills and creativity.</p>
+            <!-- Breaking News -->
+            <div class="breaking-news">
+                <span class="label"><i class="fas fa-bolt"></i> Breaking</span>
+                <span class="headline" id="breakingHeadline">City Council Approves New Park Renovation – <a href="#">Read more</a></span>
             </div>
-            <div class="projects-grid" id="featuredGrid">
-                <!-- Injected via JS -->
-            </div>
-            <div style="text-align:center;margin-top:40px;">
-                <a href="projects.html" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View All Projects</a>
-            </div>
-        </div>
-    </section>
 
-    <!-- TESTIMONIALS (Preview) -->
-    <section style="padding:80px 0;">
-        <div class="container">
-            <div class="section-header center">
-                <div class="section-label">Testimonials</div>
-                <h2 class="section-title">What People <span class="highlight">Say</span></h2>
-                <p class="section-desc">Kind words from clients and colleagues I've had the pleasure to work with.</p>
+            <!-- Category Quick Nav -->
+            <div class="category-nav">
+                <a href="#" class="active" data-filter="all">All</a>
+                <a href="#" data-filter="local">Local</a>
+                <a href="#" data-filter="international">International</a>
+                <a href="#" data-filter="tech">Tech</a>
+                <a href="#" data-filter="health">Health</a>
+                <a href="#" data-filter="sports">Sports</a>
             </div>
-            <div class="testimonials-grid" id="testimonialsGrid">
-                <!-- Injected via JS -->
+
+            <!-- Featured Article -->
+            <div class="featured-article" id="featuredArticle">
+                <div class="article-image">
+                    <i class="fas fa-newspaper"></i>
+                </div>
+                <div class="article-content">
+                    <span class="tag" style="background:rgba(108,99,255,0.15);color:var(--primary);padding:4px 14px;border-radius:30px;font-size:0.7rem;font-weight:600;text-transform:uppercase;display:inline-block;margin-bottom:10px;">Featured</span>
+                    <h2 id="featuredTitle">Global Climate Summit Reaches Historic Agreement</h2>
+                    <div class="meta" id="featuredMeta">May 18, 2026 • International</div>
+                    <p id="featuredExcerpt">Nations pledge to cut carbon emissions by 50% by 2030 in a landmark deal that reshapes global climate policy.</p>
+                    <a href="#" class="read-more">Read full story →</a>
+                </div>
             </div>
+
+            <!-- Latest Stories Grid -->
+            <section>
+                <div class="section-header">
+                    <h2 class="section-title">Latest <span class="highlight">Stories</span></h2>
+                </div>
+                <div class="projects-grid" id="newsGrid">
+                    <!-- Injected via JS -->
+                </div>
+            </section>
+
         </div>
-    </section>
+    </main>
 
     <!-- FOOTER -->
     <footer class="footer">
         <div class="container">
-            <div class="copy">&copy; 2026 John Doe. Built with <i class="fas fa-heart" style="color:var(--accent);"></i></div>
+            <div class="copy">&copy; 2026 Tory Pulse. All rights reserved.</div>
             <div class="social-links">
-                <a href="#"><i class="fab fa-github"></i></a>
-                <a href="#"><i class="fab fa-linkedin-in"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
                 <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
     </footer>
