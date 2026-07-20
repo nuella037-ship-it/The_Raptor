@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>John Doe | Projects</title>
+    <title>The Raptor – Blog</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
 
-    <!-- HEADER -->
     <header class="header">
         <div class="container">
-            <a href="index.html" class="logo">JD<span>.</span></a>
+            <a href="index.html" class="logo">The<span>Raptor</span></a>
             <nav class="nav-links" id="navLinks">
                 <a href="index.html">Home</a>
+                <a href="blog.html" class="active">Blog</a>
                 <a href="about.html">About</a>
-                <a href="projects.html" class="active">Projects</a>
                 <a href="contact.html">Contact</a>
+                <a href="#" id="searchToggle"><i class="fas fa-search"></i></a>
             </nav>
             <div style="display:flex;align-items:center;gap:6px;">
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -27,39 +27,36 @@
         </div>
     </header>
 
-    <!-- PROJECTS PAGE -->
     <section style="padding:calc(var(--header-height) + 40px) 0 60px;">
         <div class="container">
             <div class="section-header center">
-                <div class="section-label">Portfolio</div>
-                <h2 class="section-title">My <span class="highlight">Projects</span></h2>
-                <p class="section-desc">A complete collection of my work across different technologies and industries.</p>
+                <h2 class="section-title">All <span class="highlight">Articles</span></h2>
+                <p class="section-desc">Browse our latest stories by category.</p>
             </div>
 
-            <!-- Filters -->
-            <div class="project-filters" id="projectFilters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="web">Web Apps</button>
-                <button class="filter-btn" data-filter="mobile">Mobile</button>
-                <button class="filter-btn" data-filter="design">Design</button>
-                <button class="filter-btn" data-filter="ai">AI/ML</button>
+            <div class="category-nav" id="blogFilters">
+                <a href="#" class="active" data-filter="all">All</a>
+                <a href="#" data-filter="local">Local</a>
+                <a href="#" data-filter="international">International</a>
+                <a href="#" data-filter="tech">Tech</a>
+                <a href="#" data-filter="health">Health</a>
+                <a href="#" data-filter="sports">Sports</a>
             </div>
 
-            <div class="projects-grid" id="projectsGrid">
+            <div class="projects-grid" id="blogGrid">
                 <!-- Injected via JS -->
             </div>
         </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="footer">
         <div class="container">
-            <div class="copy">&copy; 2026 John Doe. Built with <i class="fas fa-heart" style="color:var(--accent);"></i></div>
+            <div class="copy">&copy; 2026 The Raptor. All rights reserved.</div>
             <div class="social-links">
-                <a href="#"><i class="fab fa-github"></i></a>
-                <a href="#"><i class="fab fa-linkedin-in"></i></a>
                 <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-facebook"></i></a>
                 <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
             </div>
         </div>
     </footer>
