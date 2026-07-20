@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tory Pulse – Latest News</title>
+    <title>The Raptor – Home</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="css/style.css" />
@@ -13,14 +13,15 @@
     <!-- HEADER -->
     <header class="header">
         <div class="container">
-            <a href="index.html" class="logo">Tory<span>Pulse</span></a>
+            <a href="index.html" class="logo">The<span>Raptor</span></a>
             <nav class="nav-links" id="navLinks">
                 <a href="index.html" class="active">Home</a>
-                <a href="#local">Local</a>
-                <a href="#international">International</a>
-                <a href="#tech">Tech</a>
-                <a href="#health">Health</a>
-                <a href="#sports">Sports</a>
+                <a href="blog.html">Blog</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="#" id="searchToggle" style="padding:8px 12px;background:var(--bg-card);border-radius:50px;">
+                    <i class="fas fa-search"></i>
+                </a>
             </nav>
             <div style="display:flex;align-items:center;gap:6px;">
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -29,57 +30,47 @@
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main style="padding:calc(var(--header-height) + 40px) 0 60px;">
+    <!-- HERO / BREAKING NEWS -->
+    <section class="hero" style="padding:calc(var(--header-height) + 40px) 0 40px;">
         <div class="container">
-
-            <!-- Breaking News -->
             <div class="breaking-news">
                 <span class="label"><i class="fas fa-bolt"></i> Breaking</span>
                 <span class="headline" id="breakingHeadline">City Council Approves New Park Renovation – <a href="#">Read more</a></span>
             </div>
-
-            <!-- Category Quick Nav -->
-            <div class="category-nav">
-                <a href="#" class="active" data-filter="all">All</a>
-                <a href="#" data-filter="local">Local</a>
-                <a href="#" data-filter="international">International</a>
-                <a href="#" data-filter="tech">Tech</a>
-                <a href="#" data-filter="health">Health</a>
-                <a href="#" data-filter="sports">Sports</a>
-            </div>
-
-            <!-- Featured Article -->
-            <div class="featured-article" id="featuredArticle">
+            <div class="featured-article">
                 <div class="article-image">
                     <i class="fas fa-newspaper"></i>
                 </div>
                 <div class="article-content">
-                    <span class="tag" style="background:rgba(108,99,255,0.15);color:var(--primary);padding:4px 14px;border-radius:30px;font-size:0.7rem;font-weight:600;text-transform:uppercase;display:inline-block;margin-bottom:10px;">Featured</span>
+                    <span class="tag featured-tag">Featured</span>
                     <h2 id="featuredTitle">Global Climate Summit Reaches Historic Agreement</h2>
                     <div class="meta" id="featuredMeta">May 18, 2026 • International</div>
                     <p id="featuredExcerpt">Nations pledge to cut carbon emissions by 50% by 2030 in a landmark deal that reshapes global climate policy.</p>
                     <a href="#" class="read-more">Read full story →</a>
                 </div>
             </div>
-
-            <!-- Latest Stories Grid -->
-            <section>
-                <div class="section-header">
-                    <h2 class="section-title">Latest <span class="highlight">Stories</span></h2>
-                </div>
-                <div class="projects-grid" id="newsGrid">
-                    <!-- Injected via JS -->
-                </div>
-            </section>
-
         </div>
-    </main>
+    </section>
+
+    <!-- LATEST STORIES -->
+    <section style="padding:40px 0 80px;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Latest <span class="highlight">Stories</span></h2>
+            </div>
+            <div class="projects-grid" id="homeGrid">
+                <!-- Injected via JS (first 4 posts) -->
+            </div>
+            <div style="text-align:center;margin-top:40px;">
+                <a href="blog.html" class="btn btn-primary"><i class="fas fa-arrow-right"></i> View All Articles</a>
+            </div>
+        </div>
+    </section>
 
     <!-- FOOTER -->
     <footer class="footer">
         <div class="container">
-            <div class="copy">&copy; 2026 Tory Pulse. All rights reserved.</div>
+            <div class="copy">&copy; 2026 The Raptor. All rights reserved.</div>
             <div class="social-links">
                 <a href="#"><i class="fab fa-twitter"></i></a>
                 <a href="#"><i class="fab fa-facebook"></i></a>
