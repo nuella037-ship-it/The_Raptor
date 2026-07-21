@@ -399,6 +399,52 @@ document.addEventListener('DOMContentLoaded', function() {
     initCategoryFilters();
     initForms();
 });
+// ============================================
+//  CONTACT FORM (send to Supabase + WhatsApp)
+// ============================================
+async function submitContactForm(formData) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('contact_messages')
+            .insert([{
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone || null,
+                subject: formData.subject,
+                message: formData.message
+            }])
+            .select();
 
+        if (error) throw error;
+        return { success: true, data };
+    } catch (err) {
+        console.error('Contact form error:', err);
+        return { success: false, error: err.message };
+    }
+}
+
+// ============================================
+//  NEWSLETTER SUBSCRIPTION
+// ============================================
+async function subscribeNewsletter(email, frequency = 'daily') {
+    try {
+        const { data, error } = await supabaseClient
+            .from('newsletter_subscribers')
+            .insert([{ email, frequency }])
+            .select();
+
+        if (error) {
+            // Handle duplicate email gracefully
+            if (error.code === '23505') { // unique violation
+                return { success: false, message: 'You are already subscribed!' };
+            }
+            throw error;
+        }
+        return { success: true, data };
+    } catch (err) {
+        console.error('Newsletter error:', err);
+        return { success: false, error: err.message };
+    }
+}
 
 
