@@ -290,11 +290,13 @@ body.dark-mode .site-logo span {
 }
 
 /* --- Desktop Navigation --- */
+/* CHANGED: Always display flex, centered, and wrap on small screens */
 .main-nav {
-    display: flex;
+    display: flex !important;               /* Always visible */
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;                /* Centered horizontally */
     gap: 1.2rem;
+    flex-wrap: wrap;                        /* Allow wrapping on small screens */
 }
 
 .nav-link {
@@ -334,7 +336,7 @@ body.dark-mode .nav-link.active::after {
     background-color: var(--primary-light);
 }
 
-/* --- Search in Navbar (Desktop) --- */
+/* --- Search in Navbar --- */
 .search-nav-item {
     display: flex;
     gap: 0.4rem;
@@ -400,78 +402,14 @@ body.dark-mode #darkModeToggle {
     transform: rotate(15deg);
 }
 
-/* --- Mobile Menu Toggle --- */
+/* --- Mobile Menu Toggle – HIDDEN --- */
 #mobileMenuToggle {
-    display: none;
-    border-radius: 8px;
-    padding: 0.4rem 0.6rem;
-    font-size: 1.2rem;
-    background: none;
-    border: 1px solid #ced4da;
-    color: var(--text-dark);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-#mobileMenuToggle:hover {
-    background: var(--light-bg);
-}
-body.dark-mode #mobileMenuToggle {
-    border-color: #444;
-    color: #ccc;
-}
-body.dark-mode #mobileMenuToggle:hover {
-    background: #2d2d44;
+    display: none !important;   /* Never show hamburger */
 }
 
-/* --- Mobile Navigation (class-based toggle) --- */
+/* --- Mobile Navigation – HIDDEN --- */
 #mobileNav {
-    display: none;
-    padding: 1rem 0;
-    border-top: 1px solid #e9ecef;
-    background: var(--white);
-}
-#mobileNav.open {
-    display: block !important;
-}
-body.dark-mode #mobileNav {
-    border-top-color: #333;
-    background: #1a1a2e;
-}
-
-.mobile-nav .nav-link {
-    display: block;
-    padding: 0.6rem 0;
-    border-bottom: 1px solid #eee;
-    font-size: 1rem;
-    color: var(--text-dark);
-    text-decoration: none;
-    transition: color 0.2s;
-}
-.mobile-nav .nav-link:hover,
-.mobile-nav .nav-link.active {
-    color: var(--primary);
-}
-body.dark-mode .mobile-nav .nav-link {
-    border-bottom-color: #333;
-    color: #ccc !important;
-}
-body.dark-mode .mobile-nav .nav-link:hover,
-body.dark-mode .mobile-nav .nav-link.active {
-    color: #fff !important;
-}
-
-.mobile-nav .search-mobile {
-    margin-top: 0.75rem;
-}
-.mobile-nav .search-mobile .form-control {
-    width: 100%;
-    border-radius: 20px;
-    padding: 0.4rem 1rem;
-}
-.mobile-nav .search-mobile .btn {
-    width: 100%;
-    border-radius: 20px;
-    margin-top: 0.4rem;
+    display: none !important;   /* Never show the mobile dropdown */
 }
 
 /* --- Search Results Dropdown --- */
@@ -901,19 +839,25 @@ footer .site-logo span {
 }
 
 /* ============================================================
-   RESPONSIVE BREAKPOINTS
+   RESPONSIVE BREAKPOINTS – UPDATED
    ============================================================ */
 
 /* --- TABLETS & SMALLER (up to 991px) --- */
 @media (max-width: 991.98px) {
+    /* CHANGED: Nav stays visible, just adjust spacing */
     .main-nav {
+        gap: 0.8rem;
+    }
+    .nav-link {
+        font-size: 0.9rem;
+    }
+    .search-nav-item .form-control {
+        width: 140px;
+    }
+    /* Hide hamburger and mobile nav (already hidden globally) */
+    #mobileMenuToggle,
+    #mobileNav {
         display: none !important;
-    }
-    #mobileMenuToggle {
-        display: inline-flex !important;
-    }
-    #mobileNav.open {
-        display: block !important;
     }
     #searchResultsContainer {
         position: relative;
@@ -927,23 +871,27 @@ footer .site-logo span {
     }
 }
 
-/* --- DESKTOP (992px and up) --- */
-@media (min-width: 992px) {
-    #mobileNav {
-        display: none !important;
-    }
-    #mobileNav.open {
-        display: none !important;
-    }
-    .main-nav {
-        display: flex !important;
-    }
-}
-
 /* --- PHONES (up to 575px) --- */
 @media (max-width: 575.98px) {
     .site-logo {
         font-size: 1.2rem;
+    }
+    /* CHANGED: Reduce nav gap and font size */
+    .main-nav {
+        gap: 0.5rem;
+        justify-content: center;
+    }
+    .nav-link {
+        font-size: 0.8rem;
+        padding: 0.2rem 0;
+    }
+    .search-nav-item .form-control {
+        width: 100px;
+        font-size: 0.75rem;
+    }
+    .search-nav-item .btn {
+        padding: 0.2rem 0.5rem;
+        font-size: 0.75rem;
     }
     .stat-item .display-4 {
         font-size: 2.2rem !important;
@@ -973,14 +921,6 @@ footer .site-logo span {
         height: 34px;
         font-size: 0.85rem;
     }
-    #mobileMenuToggle {
-        padding: 0.3rem 0.5rem;
-        font-size: 1rem;
-    }
-    .mobile-nav .nav-link {
-        font-size: 0.95rem;
-        padding: 0.5rem 0;
-    }
     #newsletterSection .btn-light {
         width: 100%;
     }
@@ -995,9 +935,6 @@ footer .site-logo span {
     }
     .display-4 {
         font-size: 2.2rem !important;
-    }
-    .search-nav-item .form-control {
-        width: 100% !important;
     }
     .search-nav-item {
         flex-wrap: wrap;
@@ -1017,6 +954,13 @@ footer .site-logo span {
     .site-logo {
         font-size: 1rem;
     }
+    .nav-link {
+        font-size: 0.7rem;
+    }
+    .search-nav-item .form-control {
+        width: 80px;
+        font-size: 0.7rem;
+    }
     .btn {
         font-size: 0.7rem;
         padding: 0.2rem 0.4rem;
@@ -1035,10 +979,6 @@ footer .site-logo span {
         height: 30px;
         font-size: 0.75rem;
     }
-    #mobileMenuToggle {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.85rem;
-    }
     .card-img-top {
         height: 120px;
     }
@@ -1054,6 +994,12 @@ footer .site-logo span {
     }
     .stat-item .display-4 {
         font-size: 2.5rem !important;
+    }
+    .main-nav {
+        gap: 0.8rem;
+    }
+    .nav-link {
+        font-size: 0.85rem;
     }
 }
 
