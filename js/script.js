@@ -1,200 +1,137 @@
 // ============================================
-// THEME TOGGLE
+//  GLOBAL SEARCH (indexes all articles)
 // ============================================
-const toggle = document.getElementById('themeToggle');
-if (toggle) {
-    let theme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', theme);
-    toggle.innerHTML = `<i class="fas ${theme === 'dark' ? 'fa-moon' : 'fa-sun'}"></i>`;
-    toggle.addEventListener('click', () => {
-        const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', t);
-        localStorage.setItem('theme', t);
-        toggle.innerHTML = `<i class="fas ${t === 'dark' ? 'fa-moon' : 'fa-sun'}"></i>`;
-    });
-}
 
-// ============================================
-// HAMBURGER MENU
-// ============================================
-const hamburger = document.getElementById('hamburger');
-const navLinks = document.getElementById('navLinks');
-if (hamburger && navLinks) {
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navLinks.classList.toggle('open');
-    });
-    navLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navLinks.classList.remove('open');
-        });
-    });
-}
-
-// ============================================
-// BLOG DATA
-// ============================================
-const blogData = [
-    {
-        id: 1,
-        title: 'City Council Approves New Park Renovation',
-        excerpt: 'The local government has greenlit a $2M project to revamp downtown park facilities.',
-        category: 'local',
-        date: 'May 20, 2026',
-        icon: 'fas fa-tree',
-        tag: 'Local News'
-    },
-    {
-        id: 2,
-        title: 'Global Climate Summit Reaches Historic Agreement',
-        excerpt: 'Nations pledge to cut carbon emissions by 50% by 2030 in a landmark deal.',
-        category: 'international',
-        date: 'May 18, 2026',
-        icon: 'fas fa-globe-americas',
-        tag: 'International'
-    },
-    {
-        id: 3,
-        title: 'AI Model Achieves Human-Level Performance in Coding',
-        excerpt: 'A new language model surpasses average developer scores on competitive programming tasks.',
-        category: 'tech',
-        date: 'May 15, 2026',
-        icon: 'fas fa-microchip',
-        tag: 'Tech'
-    },
-    {
-        id: 4,
-        title: 'Breakthrough in Cancer Research Shows Promise',
-        excerpt: 'A novel immunotherapy approach eliminates tumours in 80% of trial patients.',
-        category: 'health',
-        date: 'May 12, 2026',
-        icon: 'fas fa-heartbeat',
-        tag: 'Health'
-    },
-    {
-        id: 5,
-        title: 'Local Team Wins National Championship',
-        excerpt: 'The city’s basketball team clinched the title in a thrilling overtime victory.',
-        category: 'sports',
-        date: 'May 10, 2026',
-        icon: 'fas fa-trophy',
-        tag: 'Sports'
-    },
-    {
-        id: 6,
-        title: 'New Trade Deal Signed Between Major Economies',
-        excerpt: 'The agreement aims to reduce tariffs and boost global trade by 15%.',
-        category: 'international',
-        date: 'May 8, 2026',
-        icon: 'fas fa-handshake',
-        tag: 'International'
-    },
-    {
-        id: 7,
-        title: 'Local School Introduces Renewable Energy Curriculum',
-        excerpt: 'Students will learn about solar and wind energy through hands-on projects.',
-        category: 'local',
-        date: 'May 5, 2026',
-        icon: 'fas fa-school',
-        tag: 'Local News'
-    },
-    {
-        id: 8,
-        title: 'New Study Links Sleep Quality to Heart Health',
-        excerpt: 'Researchers find a strong correlation between deep sleep and reduced cardiovascular risk.',
-        category: 'health',
-        date: 'May 3, 2026',
-        icon: 'fas fa-bed',
-        tag: 'Health'
-    },
+// Article database (static – extend this array when adding new articles)
+const articles = [
+    { title: "AI Breakthrough in Medical Imaging Detects Early-Stage Cancers", category: "Technology", content: "Researchers at Stanford have developed a new deep-learning model that analyses MRI and CT scans with 98.7% accuracy, identifying malignancies up to 18 months earlier than traditional methods. The system has already been tested on over 50,000 patients.", author: "Dr. Elena Moore", date: "May 17, 2026" },
+    { title: "Global Markets Rally as Tech Giants Post Record Earnings", category: "Business", content: "The S&P 500 and NASDAQ surged over 3% after Apple, Microsoft, and Nvidia reported quarterly results that exceeded all analyst expectations. The rally was further fuelled by optimistic forward guidance and increased AI infrastructure spending.", author: "James Carter", date: "May 16, 2026" },
+    { title: "Champions League Final: Underdogs Stun Favourites in Extra Time", category: "Sports", content: "In one of the most dramatic finals in recent memory, Borussia Dortmund defeated Real Madrid 3–2 with a 118th-minute header from captain Marco Reus. The match saw three lead changes and a record-breaking 28 shots on target.", author: "Maria Santos", date: "May 15, 2026" },
+    { title: "Street Art Festival Transforms Downtown with 50+ Murals", category: "Culture", content: "Over 150 international artists descended on the city for the annual Mural Fest, painting vibrant large-scale works on building facades, bridges, and public plazas. Organisers expect over 200,000 visitors this weekend.", author: "Liam O'Brien", date: "May 14, 2026" },
+    { title: "Scientists Successfully Grow Mini-Brains with Functional Neural Networks", category: "Science", content: "In a groundbreaking study published in Nature, a team from MIT has cultivated cerebral organoids that exhibit spontaneous electrical activity and synaptic connectivity, opening new avenues for Alzheimer's and Parkinson's research.", author: "Dr. Aisha Khan", date: "May 13, 2026" },
+    { title: "Election Reform Bill Passes First Reading with Bipartisan Support", category: "Politics", content: "The proposed Fair Representation Act, which includes ranked-choice voting, independent redistricting, and campaign finance transparency, cleared its first major hurdle in parliament with a 68–32 vote. Final reading is scheduled for next month.", author: "Sarah Chen", date: "May 12, 2026" },
+    { title: "UN Announces $50 Billion Food Security Initiative for Africa", category: "World", content: "The program aims to boost local farming, irrigation, and supply chains across 30 nations, with a focus on sustainable agriculture and resilience against climate shocks.", author: "Global Affairs", date: "May 11, 2026" },
+    { title: "Blockchain Adoption Surges as Major Banks Launch Crypto Services", category: "Technology", content: "JPMorgan, HSBC, and BNP Paribas now offer custodial and trading services for institutional clients, signaling a major shift in traditional finance toward digital assets.", author: "Finance Weekly", date: "May 10, 2026" },
+    { title: "Mediterranean Diet Slows Brain Ageing by 5 Years, New Study Finds", category: "Health", content: "Long‑term research shows that olive oil, fish, and leafy greens boost cognitive resilience, with participants showing the brain age of someone five years younger.", author: "Health Desk", date: "May 9, 2026" },
+    { title: "SpaceX Launches First All‑Civilian Mission to Lunar Orbit", category: "Space", content: "The four‑person crew will spend 8 days in lunar orbit, conducting scientific experiments and testing new life‑support systems for future deep‑space travel.", author: "Space Today", date: "May 8, 2026" },
+    { title: "Record‑Breaking Heatwave Grips Southern Europe – Emergency Plans Activated", category: "Climate", content: "Temperatures exceed 45°C in Spain and Italy, with authorities issuing red alerts and opening cooling centres across the region.", author: "Weather Desk", date: "May 7, 2026" },
+    { title: "Hollywood Writers' Union Reaches Tentative Deal with Studios", category: "Entertainment", content: "The new contract includes AI protections, residual increases, and minimum staffing guarantees, ending the 3‑month strike that had halted production.", author: "Entertainment Weekly", date: "May 6, 2026" }
 ];
 
-// ============================================
-// RENDER BLOG POSTS
-// ============================================
-function renderBlogPosts(container, posts, filter = 'all') {
-    if (!container) return;
-    container.innerHTML = '';
-    const filtered = filter === 'all' ? posts : posts.filter(p => p.category === filter);
-    filtered.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'project-card';
-        div.innerHTML = `
-            <div class="thumb"><i class="${p.icon}"></i></div>
-            <div class="body">
-                <span class="tag">${p.tag}</span>
-                <h3>${p.title}</h3>
-                <p>${p.excerpt}</p>
-                <div style="margin-top:12px;color:var(--text-muted);font-size:0.8rem;">
-                    <i class="far fa-calendar-alt"></i> ${p.date}
-                </div>
-                <a href="#" style="display:inline-block;margin-top:12px;color:var(--primary);font-weight:600;">Read More →</a>
-            </div>
-        `;
-        container.appendChild(div);
+// Search UI elements
+const searchTrigger = document.getElementById('navSearchTrigger');
+const searchBar = document.getElementById('globalSearchBar');
+const searchInput = document.getElementById('globalSearchInput');
+const searchClose = document.getElementById('globalSearchClose');
+const searchResults = document.getElementById('searchResults');
+
+// Toggle search bar
+if (searchTrigger) {
+    searchTrigger.addEventListener('click', function(e) {
+        e.preventDefault();
+        searchBar.style.display = searchBar.style.display === 'none' ? '' : 'none';
+        if (searchBar.style.display !== 'none') {
+            searchInput.focus();
+        }
+    });
+}
+if (searchClose) {
+    searchClose.addEventListener('click', function() {
+        searchBar.style.display = 'none';
+        searchResults.innerHTML = '';
     });
 }
 
-// ============================================
-// HOME PAGE – render first 4 posts
-// ============================================
-const homeGrid = document.getElementById('homeGrid');
-if (homeGrid) {
-    renderBlogPosts(homeGrid, blogData.slice(0, 4));
+// Live search
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim().toLowerCase();
+        if (query.length === 0) {
+            searchResults.innerHTML = '';
+            return;
+        }
+        const results = articles.filter(article =>
+            article.title.toLowerCase().includes(query) ||
+            article.content.toLowerCase().includes(query) ||
+            article.category.toLowerCase().includes(query) ||
+            article.author.toLowerCase().includes(query)
+        );
+        renderSearchResults(results);
+    });
+}
+
+function renderSearchResults(results) {
+    if (results.length === 0) {
+        searchResults.innerHTML = '<div class="p-2 text-muted">No articles found.</div>';
+        return;
+    }
+    let html = '';
+    results.forEach(article => {
+        html += `
+            <div class="result-item">
+                <div class="result-title">${article.title}</div>
+                <div class="result-meta">${article.category} • ${article.author} • ${article.date}</div>
+            </div>
+        `;
+    });
+    searchResults.innerHTML = html;
 }
 
 // ============================================
-// BLOG PAGE – render all with filters
+//  DARK MODE TOGGLE
 // ============================================
-const blogGrid = document.getElementById('blogGrid');
-if (blogGrid) {
-    renderBlogPosts(blogGrid, blogData, 'all');
-
-    const filters = document.getElementById('blogFilters');
-    if (filters) {
-        filters.addEventListener('click', (e) => {
-            const link = e.target.closest('a');
-            if (!link) return;
-            const filter = link.dataset.filter;
-            if (!filter) return;
-            filters.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-            link.classList.add('active');
-            renderBlogPosts(blogGrid, blogData, filter);
-        });
+const darkToggle = document.getElementById('darkModeToggle');
+if (darkToggle) {
+    darkToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        const icon = this.querySelector('i');
+        if (document.body.classList.contains('dark-mode')) {
+            icon.className = 'fas fa-sun';
+        } else {
+            icon.className = 'fas fa-moon';
+        }
+        // Save preference
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    });
+    // Load saved preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+        darkToggle.querySelector('i').className = 'fas fa-sun';
     }
 }
 
 // ============================================
-// CONTACT FORM
+//  MOBILE MENU TOGGLE
 // ============================================
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('contactName')?.value.trim();
-        const email = document.getElementById('contactEmail')?.value.trim();
-        const message = document.getElementById('contactMessage')?.value.trim();
-        const feedback = document.getElementById('contactFeedback');
-
-        if (!name || !email || !message) {
-            feedback.textContent = 'Please fill in all required fields.';
-            feedback.className = 'form-feedback error';
-            feedback.style.display = 'block';
-            return;
-        }
-
-        feedback.textContent = 'Sending message...';
-        feedback.className = 'form-feedback';
-        feedback.style.display = 'block';
-
-        setTimeout(() => {
-            feedback.textContent = '✅ Message sent successfully! We\'ll get back to you soon.';
-            feedback.className = 'form-feedback success';
-            contactForm.reset();
-            setTimeout(() => { feedback.style.display = 'none'; }, 5000);
-        }, 1200);
+const mobileToggle = document.getElementById('mobileMenuToggle');
+const mobileNav = document.getElementById('mobileNav');
+if (mobileToggle && mobileNav) {
+    mobileToggle.addEventListener('click', function() {
+        const isVisible = mobileNav.style.display === 'block';
+        mobileNav.style.display = isVisible ? 'none' : 'block';
     });
 }
 
-console.log('✅ The Raptor loaded successfully!');
+// ============================================
+//  NEWSLETTER FORM (prevent default)
+// ============================================
+const newsletterForms = document.querySelectorAll('#newsletterForm');
+newsletterForms.forEach(form => {
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Thank you for subscribing! (This is a demo)');
+        this.reset();
+    });
+});
+
+// ============================================
+//  CONTACT FORM (prevent default)
+// ============================================
+const contactForm = document.getElementById('contactForm');
+if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Your message has been sent! (Demo)');
+        this.reset();
+    });
+}
