@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard – The Raptor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+    <!-- Simple header for admin -->
+    <header class="site-header">
+        <div class="container">
+            <div class="row align-items-center py-3">
+                <div class="col-6">
+                    <a href="index.html" class="site-logo">The<span>Raptor</span></a>
+                </div>
+                <div class="col-6 text-end">
+                    <a href="index.html" class="btn btn-outline-primary btn-sm"><i class="fas fa-home"></i> Home</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="fw-bold">Dashboard <span class="text-green">Articles</span></h1>
+                    <p class="text-muted">Add, edit, or delete articles. They are stored in your browser's local storage.</p>
+
+                    <!-- Add Article Form -->
+                    <div class="card border-0 shadow-sm p-4 mb-4">
+                        <h4 class="fw-bold">Add New Article</h4>
+                        <form id="articleForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Title *</label>
+                                    <input type="text" id="articleTitle" class="form-control" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Category *</label>
+                                    <input type="text" id="articleCategory" class="form-control" required placeholder="e.g. Technology" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Content *</label>
+                                    <textarea id="articleContent" class="form-control" rows="4" required></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Author *</label>
+                                    <input type="text" id="articleAuthor" class="form-control" required />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Date</label>
+                                    <input type="date" id="articleDate" class="form-control" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Image URL</label>
+                                    <input type="text" id="articleImage" class="form-control" placeholder="https://example.com/image.jpg" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tags (comma separated)</label>
+                                    <input type="text" id="articleTags" class="form-control" placeholder="AI, Healthcare" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Read Time (e.g. 5 min read)</label>
+                                    <input type="text" id="articleReadTime" class="form-control" placeholder="5 min read" />
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Article</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Article List -->
+                    <div class="card border-0 shadow-sm p-4">
+                        <h4 class="fw-bold">Manage Articles</h4>
+                        <div id="adminArticleList" class="list-group">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        // Admin-specific functions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load articles from localStorage
+            loadAdminArticles();
+
+            // Form submission
+            document.getElementById('articleForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const title = document.getElementById('articleTitle').value.trim();
+                const category = document.getElementById('articleCategory').value.trim();
+                const content = document.getElementById('articleContent').value.trim();
+                const author = document.getElementById('articleAuthor').value.trim();
+                const date = document.getElementById('articleDate').value || new Date().toISOString().split('T')[0];
+                const image = document.getElementById('articleImage').value.trim() || 'https://picsum.photos/seed/' + title.replace(/\s/g,'') + '/600/300';
+                const tags = document.getElementById('articleTags').value.split(',').map(s => s.trim()).filter(Boolean);
+                const readTime = document.getElementById('articleReadTime').value.trim() || '4 min read';
+
+                if (!title || !category || !content || !author) {
+                    alert('Please fill in all required fields (Title, Category, Content, Author)');
+                    return;
+                }
+
+                const newArticle = {
+                    id: Date.now().toString(),
+                    title,
+                    category,
+                    content,
+                    author,
+                    date,
+                    image,
+                    tags,
+                    readTime,
+                    comments: 0,
+                    timeAgo: 'Just now',
+                    shares: 0,
+                    excerpt: content.substring(0, 120) + '…'
+                };
+
+                let articles = JSON.parse(localStorage.getItem('raptor_articles') || '[]');
+                articles.unshift(newArticle);
+                localStorage.setItem('raptor_articles', JSON.stringify(articles));
+                loadAdminArticles();
+                this.reset();
+                // Also refresh the main site's article data (but we'll reload on page visit)
+                alert('Article added successfully!');
+            });
+        });
+
+        function loadAdminArticles() {
+            const container = document.getElementById('adminArticleList');
+            const articles = JSON.parse(localStorage.getItem('raptor_articles') || '[]');
+            if (articles.length === 0) {
+                container.innerHTML = '<div class="text-muted">No articles yet. Add one above.</div>';
+                return;
+            }
+            let html = '';
+            articles.forEach((article, index) => {
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${article.title}</strong> <span class="badge bg-primary">${article.category}</span>
+                            <br /><small class="text-muted">${article.author} • ${article.date}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteArticle('${article.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteArticle(id) {
+            if (!confirm('Delete this article?')) return;
+            let articles = JSON.parse(localStorage.getItem('raptor_articles') || '[]');
+            articles = articles.filter(a => a.id !== id);
+            localStorage.setItem('raptor_articles', JSON.stringify(articles));
+            loadAdminArticles();
+            alert('Article deleted.');
+        }
+    </script>
+</body>
+</html>
