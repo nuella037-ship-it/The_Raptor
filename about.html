@@ -19,36 +19,38 @@
         <div class="container">
             <div class="row align-items-center py-3">
                 <div class="col-6 col-lg-3">
-                    <a href="index.html" class="site-logo">The<span>Raptor</span></a>
+                    <a href="index.html" class="site-logo">The<span class="text-green">Raptor</span></a>
                 </div>
                 <div class="col-lg-7 d-none d-md-block">
-                    <nav id="mainNav" class="main-nav">
+                    <nav id="mainNav" class="main-nav" aria-label="Main navigation">
                         <a href="index.html" class="nav-link">Home</a>
                         <a href="blog.html" class="nav-link">Blog</a>
                         <a href="about.html" class="nav-link active">About</a>
                         <a href="contact.html" class="nav-link">Contact</a>
-                        <!-- Search input directly in navbar -->
+                        <!-- Search input -->
                         <div class="search-nav-item">
-                            <input type="text" id="navSearchInput" class="form-control form-control-sm" placeholder="Search articles..." />
-                            <button id="navSearchBtn" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
+                            <label for="navSearchInput" class="visually-hidden">Search articles</label>
+                            <input type="text" id="navSearchInput" class="form-control form-control-sm" placeholder="Search articles..." aria-label="Search articles" />
+                            <button id="navSearchBtn" class="btn btn-sm btn-primary" aria-label="Submit search"><i class="fas fa-search"></i></button>
                         </div>
                     </nav>
                 </div>
                 <div class="col-6 col-lg-2 text-end">
-                    <button id="darkModeToggle" class="btn btn-outline-primary btn-sm me-2"><i class="fas fa-moon"></i></button>
-                    <button id="mobileMenuToggle" class="btn btn-outline-secondary btn-sm d-md-none"><i class="fas fa-bars"></i></button>
+                    <button id="darkModeToggle" class="btn btn-outline-primary btn-sm me-2" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
+                    <button id="mobileMenuToggle" class="btn btn-outline-secondary btn-sm d-md-none" aria-label="Toggle mobile navigation"><i class="fas fa-bars"></i></button>
                 </div>
             </div>
             <!-- Mobile Nav -->
             <div id="mobileNav" class="d-md-none" style="display:none;">
-                <nav class="mobile-nav py-3">
+                <nav class="mobile-nav py-3" aria-label="Mobile navigation">
                     <a href="index.html" class="nav-link">Home</a>
                     <a href="blog.html" class="nav-link">Blog</a>
                     <a href="about.html" class="nav-link active">About</a>
                     <a href="contact.html" class="nav-link">Contact</a>
                     <div class="search-mobile mt-2">
-                        <input type="text" id="mobileSearchInput" class="form-control form-control-sm" placeholder="Search articles..." />
-                        <button id="mobileSearchBtn" class="btn btn-sm btn-primary mt-1"><i class="fas fa-search"></i> Search</button>
+                        <label for="mobileSearchInput" class="visually-hidden">Search articles</label>
+                        <input type="text" id="mobileSearchInput" class="form-control form-control-sm" placeholder="Search articles..." aria-label="Search articles" />
+                        <button id="mobileSearchBtn" class="btn btn-sm btn-primary mt-1" aria-label="Submit mobile search"><i class="fas fa-search"></i> Search</button>
                     </div>
                 </nav>
             </div>
@@ -83,7 +85,7 @@
                 <div class="col-lg-6">
                     <h2 class="fw-bold">Our <span class="text-green">Mission</span></h2>
                     <p class="lead">To inform, empower, and connect communities through fearless, fact‑based journalism that holds power accountable and gives voice to the voiceless.</p>
-                    <img src="https://picsum.photos/seed/mission2/600/400" alt="Mission" class="img-fluid rounded-3 shadow" />
+                    <img src="https://picsum.photos/seed/mission2/600/400" alt="Our mission – independent journalism" class="img-fluid rounded-3 shadow" />
                 </div>
                 <div class="col-lg-6">
                     <div class="row g-3">
@@ -165,56 +167,56 @@
             <div class="row g-4">
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/jane2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/jane2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Jane Doe – Editor-in-Chief" />
                         <h5>Jane Doe</h5>
                         <span class="badge bg-primary">Editor‑in‑Chief</span>
                         <p class="text-muted small mt-2">15 years in investigative journalism.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Jane Doe Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Jane Doe LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/mark2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/mark2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Mark Rivera – Senior Political Correspondent" />
                         <h5>Mark Rivera</h5>
                         <span class="badge bg-green">Senior Political Correspondent</span>
                         <p class="text-muted small mt-2">Covered three U.S. elections.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Mark Rivera Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Mark Rivera LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/aisha2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/aisha2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Dr. Aisha Khan – Science & Health Editor" />
                         <h5>Dr. Aisha Khan</h5>
                         <span class="badge bg-primary">Science &amp; Health Editor</span>
                         <p class="text-muted small mt-2">PhD in Neuroscience.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Aisha Khan Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Aisha Khan LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/liam2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/liam2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Liam O'Brien – Culture & Lifestyle Editor" />
                         <h5>Liam O'Brien</h5>
                         <span class="badge bg-green">Culture &amp; Lifestyle Editor</span>
                         <p class="text-muted small mt-2">Art critic and former festival organiser.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Liam O'Brien Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Liam O'Brien LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/sarah2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/sarah2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Sarah Chen – Investigative Reporter" />
                         <h5>Sarah Chen</h5>
                         <span class="badge bg-primary">Investigative Reporter</span>
                         <p class="text-muted small mt-2">Pulitzer finalist for corporate fraud work.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Sarah Chen Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Sarah Chen LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
                 <div class="col-md-4 col-lg-4">
                     <div class="card h-100 border-0 shadow-sm text-center p-3">
-                        <img src="https://picsum.photos/seed/carlos2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" />
+                        <img src="https://picsum.photos/seed/carlos2/200/200" class="rounded-circle mx-auto mb-3" style="width:120px;height:120px;object-fit:cover;" alt="Carlos Mendez – Sports Desk Chief" />
                         <h5>Carlos Mendez</h5>
                         <span class="badge bg-green">Sports Desk Chief</span>
                         <p class="text-muted small mt-2">Former ESPN journalist.</p>
-                        <div><a href="#" class="text-primary me-2"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary"><i class="fab fa-linkedin"></i></a></div>
+                        <div><a href="#" class="text-primary me-2" aria-label="Carlos Mendez Twitter"><i class="fab fa-twitter"></i></a><a href="#" class="text-primary" aria-label="Carlos Mendez LinkedIn"><i class="fab fa-linkedin"></i></a></div>
                     </div>
                 </div>
             </div>
@@ -236,7 +238,7 @@
                         <span class="badge bg-primary align-self-start">2022</span>
                         <h5 class="mt-2">Founded in Brooklyn</h5>
                         <p class="text-muted small">Started as a hyperlocal newsletter.</p>
-                        <img src="https://picsum.photos/seed/2022b/400/200" class="img-fluid rounded-3 mt-2" />
+                        <img src="https://picsum.photos/seed/2022b/400/200" class="img-fluid rounded-3 mt-2" alt="The Raptor's founding in 2022" />
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
@@ -244,7 +246,7 @@
                         <span class="badge bg-green align-self-start">2023</span>
                         <h5 class="mt-2">First National Story</h5>
                         <p class="text-muted small">Broke a major housing scandal.</p>
-                        <img src="https://picsum.photos/seed/2023b/400/200" class="img-fluid rounded-3 mt-2" />
+                        <img src="https://picsum.photos/seed/2023b/400/200" class="img-fluid rounded-3 mt-2" alt="First national story – housing scandal" />
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
@@ -252,7 +254,7 @@
                         <span class="badge bg-primary align-self-start">2024</span>
                         <h5 class="mt-2">Global Expansion</h5>
                         <p class="text-muted small">Opened bureaus in London, Nairobi, Singapore.</p>
-                        <img src="https://picsum.photos/seed/2024b/400/200" class="img-fluid rounded-3 mt-2" />
+                        <img src="https://picsum.photos/seed/2024b/400/200" class="img-fluid rounded-3 mt-2" alt="Global expansion in 2024" />
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
@@ -260,7 +262,7 @@
                         <span class="badge bg-green align-self-start">2025</span>
                         <h5 class="mt-2">Digital Innovation</h5>
                         <p class="text-muted small">Launched podcast, data visualisations.</p>
-                        <img src="https://picsum.photos/seed/2025b/400/200" class="img-fluid rounded-3 mt-2" />
+                        <img src="https://picsum.photos/seed/2025b/400/200" class="img-fluid rounded-3 mt-2" alt="Digital innovation in 2025" />
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-4">
@@ -268,7 +270,7 @@
                         <span class="badge bg-primary align-self-start">2026</span>
                         <h5 class="mt-2">Today</h5>
                         <p class="text-muted small">50,000+ daily readers, 45 journalists.</p>
-                        <img src="https://picsum.photos/seed/2026b/400/200" class="img-fluid rounded-3 mt-2" />
+                        <img src="https://picsum.photos/seed/2026b/400/200" class="img-fluid rounded-3 mt-2" alt="The Raptor today – 2026" />
                     </div>
                 </div>
             </div>
@@ -324,14 +326,14 @@
                 <div class="col-lg-8 mx-auto text-center">
                     <h2 class="fw-bold">Join <span style="opacity:0.9;">Our Team</span></h2>
                     <p class="lead">We're always looking for passionate journalists, designers, and developers. If you believe in the power of truth, we want to hear from you.</p>
-                    <a href="mailto:careers@theraptor.com" class="btn btn-light btn-lg mt-3"><i class="fas fa-paper-plane"></i> careers@theraptor.com</a>
+                    <a href="mailto:careers@theraptor.com" class="btn btn-light btn-lg mt-3" aria-label="Email careers"><i class="fas fa-paper-plane"></i> careers@theraptor.com</a>
                     <div class="mt-3"><span class="badge bg-light text-dark p-2">Current openings: Reporter (US), Data Journalist (Remote), Social Media Editor</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ===== FOOTER (matches index.html) ===== -->
+    <!-- ===== FOOTER ===== -->
     <footer id="mainFooter" class="py-5 bg-dark text-white">
         <div class="container">
             <div class="row g-4">
@@ -339,11 +341,11 @@
                     <a href="index.html" class="site-logo text-white">The<span class="text-green">Raptor</span></a>
                     <p class="text-muted small mt-2">Independent, fact‑based journalism since 2012. Our team of 45 journalists operates across 20 countries.</p>
                     <div>
-                        <a href="#" class="text-muted me-2"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-muted me-2"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-muted me-2"><i class="fab fa-youtube"></i></a>
-                        <a href="#" class="text-muted me-2"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="text-muted"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-muted" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-3">
@@ -360,14 +362,14 @@
                 <div class="col-md-6 col-lg-3">
                     <h5 class="fw-bold">Categories</h5>
                     <ul class="list-unstyled">
-                        <li><a href="blog.html" class="text-muted text-decoration-none">World</a> (126)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Technology</a> (98)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Business</a> (74)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Sports</a> (52)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Culture</a> (43)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Science</a> (38)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Health</a> (31)</li>
-                        <li><a href="blog.html" class="text-muted text-decoration-none">Travel</a> (27)</li>
+                        <li><a href="blog.html?category=world" class="text-muted text-decoration-none">World</a> (126)</li>
+                        <li><a href="blog.html?category=technology" class="text-muted text-decoration-none">Technology</a> (98)</li>
+                        <li><a href="blog.html?category=business" class="text-muted text-decoration-none">Business</a> (74)</li>
+                        <li><a href="blog.html?category=sports" class="text-muted text-decoration-none">Sports</a> (52)</li>
+                        <li><a href="blog.html?category=culture" class="text-muted text-decoration-none">Culture</a> (43)</li>
+                        <li><a href="blog.html?category=science" class="text-muted text-decoration-none">Science</a> (38)</li>
+                        <li><a href="blog.html?category=health" class="text-muted text-decoration-none">Health</a> (31)</li>
+                        <li><a href="blog.html?category=travel" class="text-muted text-decoration-none">Travel</a> (27)</li>
                     </ul>
                 </div>
                 <div class="col-md-6 col-lg-3">
