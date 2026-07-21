@@ -412,7 +412,7 @@ function initDarkMode() {
 }
 
 // ============================================
-//  MOBILE MENU TOGGLE
+//  MOBILE MENU TOGGLE – FIXED (no inline styles)
 // ============================================
 function initMobileMenu() {
     const toggle = document.getElementById('mobileMenuToggle');
@@ -420,26 +420,28 @@ function initMobileMenu() {
 
     if (!toggle || !nav) return;
 
+    // Remove any leftover inline style that might interfere
+    nav.style.display = '';
+
     toggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        nav.classList.toggle('open');
-        const isOpen = nav.classList.contains('open');
-        nav.style.display = isOpen ? 'block' : 'none';
+        const isOpen = nav.classList.toggle('open');
         this.setAttribute('aria-expanded', isOpen);
+        // No inline display manipulation – CSS handles visibility via .open class
     });
 
+    // Close when a nav link is clicked
     nav.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', function() {
             nav.classList.remove('open');
-            nav.style.display = 'none';
             toggle.setAttribute('aria-expanded', 'false');
         });
     });
 
+    // Auto-close on resize to desktop (≥992px)
     window.addEventListener('resize', function() {
         if (window.innerWidth >= 992) {
             nav.classList.remove('open');
-            nav.style.display = 'none';
             toggle.setAttribute('aria-expanded', 'false');
         }
     });
