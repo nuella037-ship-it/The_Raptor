@@ -10,16 +10,6 @@
 
         // Make it globally available so script.js can use it
         window.supabaseClient = supabase;
-
-        // Load articles when the page is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            // These functions will be defined in script.js
-            if (typeof loadLatestArticles === 'function') {
-                loadLatestArticles();
-            }
-            if (typeof loadTrendingArticles === 'function') {
-                loadTrendingArticles();
-            }
         });
 
 // ============================================
