@@ -362,23 +362,6 @@
 
     <!-- Your main JavaScript file -->
     <script src="js/script.js"></script>
-
-    <!-- Supabase initialization (placeholder keys – replace with your own) -->
-    <script>
-        // ============================================================
-        //  SUPABASE CONFIG – REPLACE THESE WITH YOUR ACTUAL KEYS
-        // ============================================================
-        const SUPABASE_URL = "YOUR_SUPABASE_URL";
-        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
-
-        // Initialize Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Make it globally available so script.js can use it
-        window.supabaseClient = supabase;
-
-        // (Contact page doesn't need to load articles, but keeping consistency)
-    </script>
-
+    
 </body>
 </html>
