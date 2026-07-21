@@ -1,3 +1,27 @@
+
+           // ============================================================
+        //  SUPABASE CONFIG – REPLACE THESE WITH YOUR ACTUAL KEYS
+        // ============================================================
+        const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Make it globally available so script.js can use it
+        window.supabaseClient = supabase;
+
+        // Load articles when the page is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // These functions will be defined in script.js
+            if (typeof loadLatestArticles === 'function') {
+                loadLatestArticles();
+            }
+            if (typeof loadTrendingArticles === 'function') {
+                loadTrendingArticles();
+            }
+        });
+
 // ============================================
 //  GLOBALS
 // ============================================
@@ -386,28 +410,5 @@ document.addEventListener('DOMContentLoaded', function() {
     initForms();
 });
 
-
-           // ============================================================
-        //  SUPABASE CONFIG – REPLACE THESE WITH YOUR ACTUAL KEYS
-        // ============================================================
-        const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
-
-        // Initialize Supabase client
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // Make it globally available so script.js can use it
-        window.supabaseClient = supabase;
-
-        // Load articles when the page is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            // These functions will be defined in script.js
-            if (typeof loadLatestArticles === 'function') {
-                loadLatestArticles();
-            }
-            if (typeof loadTrendingArticles === 'function') {
-                loadTrendingArticles();
-            }
-        });
 
 
