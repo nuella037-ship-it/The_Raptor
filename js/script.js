@@ -1,36 +1,53 @@
 // ============================================
-//  FETCH ARTICLES FROM JSON
+//  GLOBALS
 // ============================================
-let articlesData = [];
+let currentCategory = 'all';
+let allArticles = [];
+let supabaseClient = window.supabaseClient; // set by inline script on each page
 
-async function loadArticles() {
-    try {
-        const response = await fetch('js/articles.json');
-        if (!response.ok) throw new Error('Failed to load articles');
-        articlesData = await response.json();
-        // Populate UI components
-        renderLatestArticles();
-        renderTrending();
-        renderBlogArticles();
-        renderTrendingBlog();
-    } catch (error) {
-        console.error('Error loading articles:', error);
-        // Fallback: use embedded data if JSON fails (for demo)
-        articlesData = getFallbackArticles();
-        renderLatestArticles();
-        renderTrending();
-        renderBlogArticles();
-        renderTrendingBlog();
+// ============================================
+//  FETCH ARTICLES FROM SUPABASE
+// ============================================
+async function fetchArticles(category = 'all') {
+    if (!supabaseClient) {
+        console.error('Supabase client not initialized.');
+        return [];
     }
+    let query = supabaseClient
+        .from('articles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (category !== 'all') {
+        query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+        console.error('Error fetching articles:', error);
+        return [];
+    }
+    return data;
 }
 
 // ============================================
-//  RENDER LATEST ARTICLES (index page)
+//  LOAD FUNCTIONS (called from HTML)
 // ============================================
-function renderLatestArticles() {
+
+// ----- Homepage: Latest Stories -----
+async function loadLatestArticles() {
     const container = document.getElementById('latestArticlesContainer');
     if (!container) return;
-    const latest = articlesData.slice(0, 6); // show first 6
+
+    const articles = await fetchArticles('all');
+    const latest = articles.slice(0, 6);
+    allArticles = articles; // store for search
+
+    if (latest.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No articles yet. Check back soon!</div>`;
+        return;
+    }
+
     container.innerHTML = latest.map(article => `
         <div class="col-md-6 col-lg-4">
             <div class="card h-100 border-0 shadow-sm">
@@ -38,12 +55,12 @@ function renderLatestArticles() {
                 <div class="card-body">
                     <span class="badge bg-primary mb-2">${article.category}</span>
                     <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                    <div class="text-muted small">By <strong>${article.author}</strong> • ${article.date} • ${article.readTime || '4 min read'}</div>
+                    <div class="text-muted small">By <strong>${article.author || 'Editor'}</strong> • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
                     <p class="card-text mt-2">${article.excerpt || article.content.substring(0, 120) + '…'}</p>
                     <div class="d-flex justify-content-between text-muted small">
-                        <span><i class="fas fa-tag"></i> ${article.tags ? article.tags.join(', ') : article.category}</span>
+                        <span><i class="fas fa-tag"></i> ${article.category}</span>
                         <span><i class="fas fa-comment"></i> ${article.comments || 0}</span>
-                        <span><i class="fas fa-clock"></i> ${article.timeAgo || '1 day ago'}</span>
+                        <span><i class="fas fa-clock"></i> ${article.timeAgo || 'recent'}</span>
                     </div>
                 </div>
             </div>
@@ -51,21 +68,27 @@ function renderLatestArticles() {
     `).join('');
 }
 
-// ============================================
-//  RENDER TRENDING (index page)
-// ============================================
-function renderTrending() {
+// ----- Homepage: Trending -----
+async function loadTrendingArticles() {
     const container = document.getElementById('trendingContainer');
     if (!container) return;
-    const trending = articlesData.slice(0, 6);
+
+    const articles = await fetchArticles('all');
+    const trending = articles.slice(0, 6);
     const colors = ['bg-primary', 'bg-green', 'bg-primary', 'bg-green', 'bg-primary', 'bg-green'];
+
+    if (trending.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No trending stories.</div>`;
+        return;
+    }
+
     container.innerHTML = trending.map((article, index) => `
         <div class="col-md-6">
             <div class="d-flex gap-3 align-items-start">
                 <span class="badge ${colors[index % colors.length]} rounded-circle p-3 fs-5">${String(index+1).padStart(2, '0')}</span>
                 <div>
                     <h5><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                    <span class="text-muted small">By ${article.author} • ${article.date} • ${article.shares || '1.2k'} shares</span>
+                    <span class="text-muted small">By ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</span>
                     <p class="text-muted small">${article.excerpt || article.content.substring(0, 80) + '…'}</p>
                 </div>
             </div>
@@ -73,46 +96,115 @@ function renderTrending() {
     `).join('');
 }
 
-// ============================================
-//  RENDER BLOG ARTICLES (blog page)
-// ============================================
-function renderBlogArticles() {
-    const container = document.getElementById('blogArticlesContainer');
+// ----- Blog Page: Featured Story -----
+async function loadFeaturedArticle() {
+    const container = document.getElementById('featuredContainer');
     if (!container) return;
-    const articles = articlesData.slice(0, 12);
+
+    const articles = await fetchArticles('all');
+    if (articles.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No featured article.</div>`;
+        return;
+    }
+
+    const featured = articles[0]; // most recent
+
+    container.innerHTML = `
+        <div class="col-lg-6">
+            <img src="${featured.image || 'https://picsum.photos/seed/featured/800/500'}" alt="${featured.title}" class="img-fluid rounded-3 shadow featured-image" />
+        </div>
+        <div class="col-lg-6">
+            <span class="badge bg-danger mb-2">Featured</span>
+            <h2 class="fw-bold">${featured.title}</h2>
+            <div class="text-muted small">
+                By <strong>${featured.author || 'Editor'}</strong> • ${featured.date || new Date(featured.created_at).toLocaleDateString()} • ${featured.readTime || '5 min read'} • <i class="fas fa-comment"></i> ${featured.comments || 0} comments
+            </div>
+            <p>${featured.excerpt || featured.content.substring(0, 200) + '…'}</p>
+            <a href="#" class="btn btn-primary">Read full story →</a>
+        </div>
+    `;
+}
+
+// ----- Blog Page: Article Grid (with category filter) -----
+async function loadBlogArticles(category = 'all') {
+    const container = document.getElementById('blogArticlesContainer');
+    const countDisplay = document.getElementById('resultCount');
+    if (!container) return;
+
+    currentCategory = category;
+    const articles = await fetchArticles(category);
+    allArticles = articles; // for search
+
+    if (articles.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No articles found in this category.</div>`;
+        if (countDisplay) countDisplay.textContent = 'Showing 0 articles';
+        return;
+    }
+
+    if (countDisplay) {
+        countDisplay.textContent = `Showing ${articles.length} articles`;
+        // Update total article count in hero
+        const articleCountSpan = document.getElementById('articleCount');
+        if (articleCountSpan) articleCountSpan.textContent = articles.length;
+        // Update last updated
+        const lastUpdatedSpan = document.getElementById('lastUpdated');
+        if (lastUpdatedSpan && articles.length > 0) {
+            const latestDate = new Date(articles[0].created_at);
+            lastUpdatedSpan.textContent = latestDate.toLocaleString();
+        }
+    }
+
     container.innerHTML = articles.map(article => `
         <div class="col-md-6 col-lg-4">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm position-relative">
+                <span class="article-category">${article.category}</span>
                 <img src="${article.image || 'https://picsum.photos/seed/' + article.category + '/600/300'}" class="card-img-top" alt="${article.title}" />
                 <div class="card-body">
-                    <span class="badge bg-primary mb-2">${article.category}</span>
                     <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                    <div class="text-muted small">By <strong>${article.author}</strong> • ${article.date} • ${article.readTime || '4 min read'}</div>
+                    <div class="text-muted small">By <strong>${article.author || 'Editor'}</strong> • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
                     <p class="card-text mt-2">${article.excerpt || article.content.substring(0, 120) + '…'}</p>
                     <div class="d-flex justify-content-between text-muted small">
-                        <span><i class="fas fa-tag"></i> ${article.tags ? article.tags.join(', ') : article.category}</span>
+                        <span><i class="fas fa-tag"></i> ${article.category}</span>
                         <span><i class="fas fa-comment"></i> ${article.comments || 0}</span>
-                        <span><i class="fas fa-clock"></i> ${article.timeAgo || '1 day ago'}</span>
+                        <span><i class="fas fa-clock"></i> ${article.timeAgo || 'recent'}</span>
                     </div>
                 </div>
             </div>
         </div>
     `).join('');
+
+    // Update active filter button
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        btn.classList.add('btn-outline-primary');
+        if (btn.dataset.category === category) {
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary', 'active');
+        }
+    });
 }
 
-function renderTrendingBlog() {
-    // reuse same as index trending, but for blog page
+// ----- Blog Page: Trending (separate from homepage) -----
+async function loadTrendingArticlesBlog() {
     const container = document.getElementById('trendingContainerBlog');
     if (!container) return;
-    const trending = articlesData.slice(0, 6);
+
+    const articles = await fetchArticles('all');
+    const trending = articles.slice(0, 6);
     const colors = ['bg-primary', 'bg-green', 'bg-primary', 'bg-green', 'bg-primary', 'bg-green'];
+
+    if (trending.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No trending stories.</div>`;
+        return;
+    }
+
     container.innerHTML = trending.map((article, index) => `
         <div class="col-md-6">
             <div class="d-flex gap-3 align-items-start">
                 <span class="badge ${colors[index % colors.length]} rounded-circle p-3 fs-5">${String(index+1).padStart(2, '0')}</span>
                 <div>
                     <h5><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                    <span class="text-muted small">By ${article.author} • ${article.date} • ${article.shares || '1.2k'} shares</span>
+                    <span class="text-muted small">By ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</span>
                     <p class="text-muted small">${article.excerpt || article.content.substring(0, 80) + '…'}</p>
                 </div>
             </div>
@@ -121,75 +213,109 @@ function renderTrendingBlog() {
 }
 
 // ============================================
-//  GLOBAL SEARCH
+//  SEARCH FUNCTIONALITY (all search inputs)
 // ============================================
-const searchTrigger = document.getElementById('navSearchTrigger');
-const searchBar = document.getElementById('globalSearchBar');
-const searchInput = document.getElementById('globalSearchInput');
-const searchClose = document.getElementById('globalSearchClose');
-const searchResults = document.getElementById('searchResults');
-
-if (searchTrigger) {
-    searchTrigger.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (searchBar.style.display === 'none') {
-            searchBar.style.display = '';
-            searchInput.focus();
-        } else {
-            searchBar.style.display = 'none';
-            searchResults.innerHTML = '';
-        }
-    });
-}
-if (searchClose) {
-    searchClose.addEventListener('click', function() {
-        searchBar.style.display = 'none';
-        searchResults.innerHTML = '';
-        searchInput.value = '';
-    });
-}
-
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        const query = this.value.trim().toLowerCase();
-        if (query.length === 0) {
-            searchResults.innerHTML = '';
-            return;
-        }
-        const results = articlesData.filter(article =>
-            article.title.toLowerCase().includes(query) ||
-            article.content.toLowerCase().includes(query) ||
-            article.category.toLowerCase().includes(query) ||
-            article.author.toLowerCase().includes(query) ||
-            (article.tags && article.tags.some(tag => tag.toLowerCase().includes(query)))
-        );
-        renderSearchResults(results);
-    });
+async function performSearch(query) {
+    if (!query || query.trim().length === 0) {
+        hideSearchResults();
+        return;
+    }
+    const q = query.trim().toLowerCase();
+    // If we haven't loaded all articles yet, fetch them
+    if (allArticles.length === 0) {
+        allArticles = await fetchArticles('all');
+    }
+    const results = allArticles.filter(article =>
+        article.title.toLowerCase().includes(q) ||
+        article.content.toLowerCase().includes(q) ||
+        article.category.toLowerCase().includes(q) ||
+        (article.author && article.author.toLowerCase().includes(q)) ||
+        (article.tags && article.tags.some(tag => tag.toLowerCase().includes(q)))
+    );
+    renderSearchResults(results);
 }
 
 function renderSearchResults(results) {
+    const container = document.getElementById('searchResultsContainer');
+    if (!container) return;
+
     if (results.length === 0) {
-        searchResults.innerHTML = '<div class="p-2 text-muted">No articles found.</div>';
+        container.innerHTML = `<div class="p-3 text-muted">No articles found.</div>`;
+        container.style.display = 'block';
         return;
     }
+
     let html = '';
-    results.forEach(article => {
+    results.slice(0, 10).forEach(article => {
         html += `
             <div class="result-item">
                 <div class="result-title">${article.title}</div>
-                <div class="result-meta">${article.category} • ${article.author} • ${article.date}</div>
+                <div class="result-meta">${article.category} • ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
             </div>
         `;
     });
-    searchResults.innerHTML = html;
+    if (results.length > 10) {
+        html += `<div class="result-item text-muted small">… and ${results.length - 10} more</div>`;
+    }
+    container.innerHTML = html;
+    container.style.display = 'block';
+}
+
+function hideSearchResults() {
+    const container = document.getElementById('searchResultsContainer');
+    if (container) container.style.display = 'none';
+}
+
+// Attach search events to all search inputs
+function initSearch() {
+    const searchInputs = [
+        document.getElementById('navSearchInput'),
+        document.getElementById('mobileSearchInput')
+    ];
+    searchInputs.forEach(input => {
+        if (!input) return;
+        input.addEventListener('input', function(e) {
+            performSearch(this.value);
+        });
+        // Optional: close on blur with delay
+        input.addEventListener('blur', function() {
+            setTimeout(hideSearchResults, 300);
+        });
+        input.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                performSearch(this.value);
+            }
+        });
+    });
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        const container = document.getElementById('searchResultsContainer');
+        if (container && !container.contains(e.target) && !e.target.closest('.search-nav-item') && !e.target.closest('.search-mobile')) {
+            hideSearchResults();
+        }
+    });
+}
+
+// ============================================
+//  CATEGORY FILTER BUTTONS
+// ============================================
+function initCategoryFilters() {
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.dataset.category;
+            loadBlogArticles(category);
+        });
+    });
 }
 
 // ============================================
 //  DARK MODE TOGGLE
 // ============================================
-const darkToggle = document.getElementById('darkModeToggle');
-if (darkToggle) {
-    darkToggle.addEventListener('click', function() {
+function initDarkMode() {
+    const toggle = document.getElementById('darkModeToggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', function() {
         document.body.classList.toggle('dark-mode');
         const icon = this.querySelector('i');
         if (document.body.classList.contains('dark-mode')) {
@@ -199,224 +325,67 @@ if (darkToggle) {
         }
         localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
     });
+    // Load saved preference
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
-        darkToggle.querySelector('i').className = 'fas fa-sun';
+        const icon = toggle.querySelector('i');
+        if (icon) icon.className = 'fas fa-sun';
     }
 }
 
 // ============================================
 //  MOBILE MENU TOGGLE
 // ============================================
-const mobileToggle = document.getElementById('mobileMenuToggle');
-const mobileNav = document.getElementById('mobileNav');
-if (mobileToggle && mobileNav) {
-    mobileToggle.addEventListener('click', function() {
-        const isVisible = mobileNav.style.display === 'block';
-        mobileNav.style.display = isVisible ? 'none' : 'block';
+function initMobileMenu() {
+    const toggle = document.getElementById('mobileMenuToggle');
+    const nav = document.getElementById('mobileNav');
+    if (!toggle || !nav) return;
+    toggle.addEventListener('click', function() {
+        const isVisible = nav.style.display === 'block';
+        nav.style.display = isVisible ? 'none' : 'block';
+    });
+    // Auto-hide on resize
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 768 && nav) {
+            nav.style.display = 'none';
+        }
     });
 }
 
 // ============================================
 //  NEWSLETTER & CONTACT FORMS
 // ============================================
-document.querySelectorAll('#newsletterForm').forEach(form => {
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Thank you for subscribing! (Demo)');
-        this.reset();
+function initForms() {
+    // Newsletter forms
+    document.querySelectorAll('#newsletterForm').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thank you for subscribing! (Demo)');
+            this.reset();
+        });
     });
-});
-const contactForm = document.getElementById('contactForm');
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Your message has been sent! (Demo)');
-        this.reset();
-    });
-}
-
-// ============================================
-//  FALLBACK ARTICLES (if JSON fails)
-// ============================================
-function getFallbackArticles() {
-    return [
-        {
-            title: "AI Breakthrough in Medical Imaging Detects Early-Stage Cancers",
-            category: "Technology",
-            content: "Researchers at Stanford have developed a new deep-learning model that analyses MRI and CT scans with 98.7% accuracy, identifying malignancies up to 18 months earlier than traditional methods. The system has already been tested on over 50,000 patients.",
-            author: "Dr. Elena Moore",
-            date: "May 17, 2026",
-            tags: ["AI", "Healthcare"],
-            comments: 87,
-            timeAgo: "3 hours ago",
-            shares: 1200,
-            readTime: "5 min read",
-            image: "https://picsum.photos/seed/tech/600/300"
-        },
-        {
-            title: "Global Markets Rally as Tech Giants Post Record Earnings",
-            category: "Business",
-            content: "The S&P 500 and NASDAQ surged over 3% after Apple, Microsoft, and Nvidia reported quarterly results that exceeded all analyst expectations.",
-            author: "James Carter",
-            date: "May 16, 2026",
-            tags: ["Finance", "Stocks"],
-            comments: 64,
-            timeAgo: "5 hours ago",
-            shares: 987,
-            readTime: "4 min read",
-            image: "https://picsum.photos/seed/business/600/300"
-        },
-        {
-            title: "Champions League Final: Underdogs Stun Favourites in Extra Time",
-            category: "Sports",
-            content: "In one of the most dramatic finals in recent memory, Borussia Dortmund defeated Real Madrid 3–2 with a 118th-minute header from captain Marco Reus.",
-            author: "Maria Santos",
-            date: "May 15, 2026",
-            tags: ["Football", "UEFA"],
-            comments: 213,
-            timeAgo: "1 day ago",
-            shares: 1500,
-            readTime: "6 min read",
-            image: "https://picsum.photos/seed/sports/600/300"
-        },
-        {
-            title: "Street Art Festival Transforms Downtown with 50+ Murals",
-            category: "Culture",
-            content: "Over 150 international artists descended on the city for the annual Mural Fest, painting vibrant large-scale works on building facades.",
-            author: "Liam O'Brien",
-            date: "May 14, 2026",
-            tags: ["Art", "Community"],
-            comments: 41,
-            timeAgo: "2 days ago",
-            shares: 632,
-            readTime: "3 min read",
-            image: "https://picsum.photos/seed/culture/600/300"
-        },
-        {
-            title: "Scientists Successfully Grow Mini-Brains with Functional Neural Networks",
-            category: "Science",
-            content: "In a groundbreaking study published in Nature, a team from MIT has cultivated cerebral organoids that exhibit spontaneous electrical activity and synaptic connectivity.",
-            author: "Dr. Aisha Khan",
-            date: "May 13, 2026",
-            tags: ["Neuroscience", "Research"],
-            comments: 112,
-            timeAgo: "3 days ago",
-            shares: 845,
-            readTime: "7 min read",
-            image: "https://picsum.photos/seed/science/600/300"
-        },
-        {
-            title: "Election Reform Bill Passes First Reading with Bipartisan Support",
-            category: "World",
-            content: "The proposed Fair Representation Act, which includes ranked-choice voting, independent redistricting, and campaign finance transparency, cleared its first major hurdle in parliament with a 68–32 vote.",
-            author: "Sarah Chen",
-            date: "May 12, 2026",
-            tags: ["Government", "Law"],
-            comments: 156,
-            timeAgo: "4 days ago",
-            shares: 1024,
-            readTime: "5 min read",
-            image: "https://picsum.photos/seed/world/600/300"
-        },
-        {
-            title: "UN Announces $50 Billion Food Security Initiative for Africa",
-            category: "World",
-            content: "The program aims to boost local farming, irrigation, and supply chains across 30 nations, with a focus on sustainable agriculture and resilience against climate shocks.",
-            author: "Global Affairs",
-            date: "May 11, 2026",
-            tags: ["Aid", "Agriculture"],
-            comments: 98,
-            timeAgo: "5 days ago",
-            shares: 876,
-            readTime: "6 min read",
-            image: "https://picsum.photos/seed/africa/600/300"
-        },
-        {
-            title: "Blockchain Adoption Surges as Major Banks Launch Crypto Services",
-            category: "Technology",
-            content: "JPMorgan, HSBC, and BNP Paribas now offer custodial and trading services for institutional clients, signaling a major shift in traditional finance toward digital assets.",
-            author: "Finance Weekly",
-            date: "May 10, 2026",
-            tags: ["Crypto", "Banking"],
-            comments: 73,
-            timeAgo: "6 days ago",
-            shares: 678,
-            readTime: "4 min read",
-            image: "https://picsum.photos/seed/crypto/600/300"
-        },
-        {
-            title: "Mediterranean Diet Slows Brain Ageing by 5 Years, New Study Finds",
-            category: "Health",
-            content: "Long‑term research shows that olive oil, fish, and leafy greens boost cognitive resilience, with participants showing the brain age of someone five years younger.",
-            author: "Health Desk",
-            date: "May 9, 2026",
-            tags: ["Nutrition", "Neurology"],
-            comments: 54,
-            timeAgo: "1 week ago",
-            shares: 672,
-            readTime: "5 min read",
-            image: "https://picsum.photos/seed/health/600/300"
-        },
-        {
-            title: "SpaceX Launches First All‑Civilian Mission to Lunar Orbit",
-            category: "Science",
-            content: "The four‑person crew will spend 8 days in lunar orbit, conducting scientific experiments and testing new life‑support systems for future deep‑space travel.",
-            author: "Space Today",
-            date: "May 8, 2026",
-            tags: ["Space", "Exploration"],
-            comments: 132,
-            timeAgo: "1 week ago",
-            shares: 1100,
-            readTime: "8 min read",
-            image: "https://picsum.photos/seed/space/600/300"
-        },
-        {
-            title: "Record‑Breaking Heatwave Grips Southern Europe – Emergency Plans Activated",
-            category: "World",
-            content: "Temperatures exceed 45°C in Spain and Italy, with authorities issuing red alerts and opening cooling centres across the region.",
-            author: "Weather Desk",
-            date: "May 7, 2026",
-            tags: ["Weather", "Climate"],
-            comments: 67,
-            timeAgo: "1 week ago",
-            shares: 734,
-            readTime: "4 min read",
-            image: "https://picsum.photos/seed/heat/600/300"
-        },
-        {
-            title: "Hollywood Writers' Union Reaches Tentative Deal with Studios",
-            category: "Culture",
-            content: "The new contract includes AI protections, residual increases, and minimum staffing guarantees, ending the 3‑month strike that had halted production.",
-            author: "Entertainment Weekly",
-            date: "May 6, 2026",
-            tags: ["Film", "Labor"],
-            comments: 44,
-            timeAgo: "1 week ago",
-            shares: 512,
-            readTime: "3 min read",
-            image: "https://picsum.photos/seed/hollywood/600/300"
-        }
-    ];
-}
-
-// ============================================
-//  INIT
-// ============================================
-document.addEventListener('DOMContentLoaded', loadArticles);
-// ============================================
-//  HIDE MOBILE NAV ON RESIZE TO MD OR LARGER
-// ============================================
-function handleResize() {
-    const mobileNav = document.getElementById('mobileNav');
-    if (window.innerWidth >= 768 && mobileNav) {
-        mobileNav.style.display = 'none';
+    // Contact form
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Your message has been sent! (Demo)');
+            this.reset();
+        });
     }
 }
 
-window.addEventListener('resize', handleResize);
-// Also call once on load to ensure correct state
+// ============================================
+//  INITIALIZATION
+// ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    handleResize();
-    // ... rest of your init (like loadArticles) ...
+    initDarkMode();
+    initMobileMenu();
+    initSearch();
+    initCategoryFilters();
+    initForms();
+
+    // The page-specific load functions are called from the inline script
+    // (e.g., loadBlogArticles('all'), loadFeaturedArticle(), etc.)
+    // They are already invoked in each page's inline script block.
 });
