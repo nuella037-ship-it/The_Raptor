@@ -1,351 +1,311 @@
-/* ============================================================
-   NAVBAR – Sticky, Horizontal
-   Logo left | Nav links right (top row)
-   Search + Dark mode centered together (bottom row)
-   ============================================================ */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Raptor – Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
 
-.site-header {
-    position: sticky;
-    top: 0;
-    z-index: 1050;
-    background: #ffffff;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
-}
+    <!-- ===== HEADER – always visible, centered navbar ===== -->
+    <header id="mainHeader" class="site-header">
+        <div class="container">
+            <div class="row align-items-center py-3">
+                <!-- Logo (left) -->
+                <div class="col-6 col-lg-3">
+                    <a href="index.html" class="site-logo">The<span class="text-green">Raptor</span></a>
+                </div>
 
-/* ----- OVERRIDE BOOTSTRAP ROW ----- */
-.site-header .row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    margin: 0;
-    position: relative;
-    padding-bottom: 3.8rem;
-}
+                <!-- Navbar (center) – always visible, no d-none classes -->
+                <div class="col-lg-7">
+                    <nav id="mainNav" class="main-nav" aria-label="Main navigation">
+                        <a href="index.html" class="nav-link active">Home</a>
+                        <a href="blog.html" class="nav-link">Blog</a>
+                        <a href="about.html" class="nav-link">About</a>
+                        <a href="contact.html" class="nav-link">Contact</a>
+                        <!-- Search input -->
+                        <div class="search-nav-item">
+                            <label for="navSearchInput" class="visually-hidden">Search articles</label>
+                            <input type="text" id="navSearchInput" class="form-control form-control-sm" placeholder="Search articles..." aria-label="Search articles" />
+                            <button id="navSearchBtn" class="btn btn-sm btn-primary" aria-label="Submit search"><i class="fas fa-search"></i></button>
+                        </div>
+                    </nav>
+                </div>
 
-/* ----- COLUMN 1: LOGO (left) ----- */
-.site-header .col-6.col-lg-3 {
-    flex: 0 0 auto;
-    padding: 0;
-    order: 1;
-    width: auto;
-}
+                <!-- Dark mode toggle (right) -->
+                <div class="col-6 col-lg-2 text-end">
+                    <button id="darkModeToggle" class="btn btn-outline-primary btn-sm me-2" aria-label="Toggle dark mode"><i class="fas fa-moon"></i></button>
+                    <!-- No hamburger button -->
+                </div>
+            </div>
+        </div>
+    </header>
 
-/* ----- COLUMN 2: NAVBAR (right) ----- */
-.site-header .col-lg-7 {
-    flex: 1 1 auto;
-    padding: 0;
-    order: 2;
-    display: flex;
-    justify-content: flex-end;
-}
+    <!-- ===== HERO / BREAKING + FEATURED ===== -->
+    <section id="homeHero" class="py-5">
+        <div class="container">
+            <div class="breaking-news bg-light p-2 rounded-3 mb-4" aria-live="polite">
+                <span class="badge bg-danger me-2"><i class="fas fa-bolt"></i> Breaking</span>
+                <span id="breakingText">
+                    <!-- Dynamically populated by script.js -->
+                </span>
+            </div>
 
-/* ----- COLUMN 3: DARK MODE (hide original) ----- */
-.site-header .col-6.col-lg-2 {
-    display: none;
-}
+            <div class="row g-4 align-items-center">
+                <div class="col-lg-6">
+                    <img src="https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=800&h=500&fit=crop" alt="Climate Summit" class="img-fluid rounded-3 shadow" />
+                </div>
+                <div class="col-lg-6">
+                    <span class="badge bg-primary mb-2">Exclusive</span>
+                    <span class="badge bg-secondary mb-2">May 18, 2026</span>
+                    <h2 class="fw-bold">Global Climate Summit Reaches Historic Agreement</h2>
+                    <div class="text-muted small mb-2">
+                        By <strong>Elena Rodriguez</strong> • 5 min read • <i class="fas fa-comment"></i> 142 comments
+                    </div>
+                    <p>In a landmark turn of events, representatives from 195 nations have unanimously pledged to cut carbon emissions by 50% by 2030, marking the most ambitious climate accord in history. The deal includes a $200 billion fund to support developing nations in their green transition, strict penalties for non-compliance, and a new independent oversight committee.</p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-green"></i> Binding emissions targets for every signatory</li>
+                        <li><i class="fas fa-check-circle text-green"></i> Phased elimination of fossil fuel subsidies by 2028</li>
+                        <li><i class="fas fa-check-circle text-green"></i> Mandatory reforestation commitments</li>
+                    </ul>
+                    <a href="blog.html" class="btn btn-primary">Read full story →</a>
+                    <a href="#" class="btn btn-outline-secondary ms-2" aria-label="Share"><i class="fas fa-share-alt"></i> Share</a>
+                    <a href="#" class="btn btn-outline-secondary" aria-label="Save"><i class="fas fa-bookmark"></i> Save</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-/* ----- LOGO ----- */
-.site-logo {
-    font-size: 1.6rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    text-decoration: none;
-    color: #1a1a2e;
-    transition: color 0.3s ease;
-    white-space: nowrap;
-}
-.site-logo .text-green {
-    color: #1e8449;
-}
+    <!-- ===== LATEST STORIES ===== -->
+    <section id="latestStories" class="py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="fw-bold">Latest <span class="text-green">Stories</span></h2>
+                </div>
+                <div class="col text-end">
+                    <a href="blog.html" class="btn btn-outline-primary">View all articles <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="row g-4" id="latestArticlesContainer">
+                <!-- Loading spinner -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status" aria-label="Loading latest stories">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-/* ----- NAVIGATION – right-aligned ----- */
-.main-nav {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: wrap;
-    gap: 0.4rem 1.6rem;
-    padding: 0.25rem 0;
-    width: 100%;
-}
+    <!-- ===== CATEGORIES ===== -->
+    <section id="categoriesSection" class="py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col text-center">
+                    <h2 class="fw-bold">Explore <span class="text-green">Categories</span></h2>
+                    <p class="text-muted">Find the topics that matter to you</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=world" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-globe-americas text-primary fs-1"></i>
+                        <h5 class="fw-bold mt-2">World News</h5>
+                        <span class="text-muted small">126 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=technology" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-microchip text-green fs-1"></i>
+                        <h5 class="fw-bold mt-2">Technology</h5>
+                        <span class="text-muted small">98 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=business" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-chart-pie text-primary fs-1"></i>
+                        <h5 class="fw-bold mt-2">Business</h5>
+                        <span class="text-muted small">74 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=sports" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-football-ball text-green fs-1"></i>
+                        <h5 class="fw-bold mt-2">Sports</h5>
+                        <span class="text-muted small">52 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=culture" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-paint-brush text-primary fs-1"></i>
+                        <h5 class="fw-bold mt-2">Culture</h5>
+                        <span class="text-muted small">43 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=science" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-flask text-green fs-1"></i>
+                        <h5 class="fw-bold mt-2">Science</h5>
+                        <span class="text-muted small">38 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=health" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-heartbeat text-primary fs-1"></i>
+                        <h5 class="fw-bold mt-2">Health</h5>
+                        <span class="text-muted small">31 articles</span>
+                    </a>
+                </div>
+                <div class="col-md-3 col-6">
+                    <a href="blog.html?category=travel" class="card border-0 shadow-sm text-center p-3 h-100 text-decoration-none text-reset">
+                        <i class="fas fa-plane text-green fs-1"></i>
+                        <h5 class="fw-bold mt-2">Travel</h5>
+                        <span class="text-muted small">27 articles</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-.main-nav .nav-link {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #1a1a2e;
-    text-decoration: none;
-    padding: 0.4rem 0.2rem;
-    border-bottom: 2.5px solid transparent;
-    transition: color 0.25s ease, border-color 0.25s ease;
-    white-space: nowrap;
-    letter-spacing: 0.01em;
-}
-.main-nav .nav-link:hover,
-.main-nav .nav-link:focus {
-    color: #1e8449;
-    border-bottom-color: #1e8449;
-}
-.main-nav .nav-link.active {
-    color: #1e8449;
-    border-bottom-color: #1e8449;
-}
+    <!-- ===== TRENDING NOW ===== -->
+    <section id="trendingSection" class="py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col">
+                    <h2 class="fw-bold">Trending <span class="text-green">Now</span></h2>
+                    <span class="text-muted">Most discussed stories today</span>
+                </div>
+            </div>
+            <div class="row g-4" id="trendingContainer">
+                <!-- Loading spinner -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status" aria-label="Loading trending stories">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-/* ----- SEARCH + DARK MODE – centered together ----- */
-.search-nav-item {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    top: 100%;
-    width: 90%;
-    max-width: 550px;
-    min-width: 300px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0;
-    background: inherit;
-}
+    <!-- ===== NEWSLETTER ===== -->
+    <section id="newsletterSection" class="py-5" style="background: linear-gradient(135deg, #1a5276, #1e8449);">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center text-white">
+                    <h2 class="fw-bold">Subscribe to <span style="opacity:0.9;">The Raptor</span> Daily</h2>
+                    <p>Join over 250,000 readers who start their morning with our curated briefing. Get the top 5 stories, exclusive insights, and a weekly deep‑dive — all free.</p>
+                    <div id="newsletterFormContainer">
+                        <form id="newsletterForm" class="row g-3 justify-content-center mt-3" novalidate>
+                            <div class="col-md-4">
+                                <label for="newsletterEmail" class="visually-hidden">Email address</label>
+                                <input type="email" id="newsletterEmail" class="form-control" placeholder="Email address" required aria-required="true" />
+                                <div class="invalid-feedback">Please enter a valid email address.</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="newsletterFrequency" class="visually-hidden">Frequency</label>
+                                <select id="newsletterFrequency" class="form-select">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="weekend">Weekend</option>
+                                </select>
+                            </div>
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-light"><i class="fas fa-envelope"></i> Subscribe</button>
+                            </div>
+                        </form>
+                        <div id="newsletterSuccess" class="alert alert-success mt-3 d-none" role="alert">
+                            <i class="fas fa-check-circle"></i> Thank you! You’re now subscribed.
+                        </div>
+                    </div>
+                    <div class="mt-3 d-flex flex-wrap justify-content-center gap-3">
+                        <span><i class="fas fa-check-circle"></i> No spam</span>
+                        <span><i class="fas fa-lock"></i> Secure</span>
+                        <span><i class="fas fa-star"></i> 250k+ readers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-/* Search input – flexes to fill space */
-.search-nav-item .form-control {
-    flex: 1;
-    border-radius: 40px;
-    border: 1.5px solid #e2e8f0;
-    padding: 0.45rem 1rem;
-    font-size: 0.9rem;
-    background: #f8fafc;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
-    min-width: 120px;
-}
-.search-nav-item .form-control:focus {
-    border-color: #1e8449;
-    box-shadow: 0 0 0 3px rgba(30, 132, 73, 0.15);
-    background: #ffffff;
-    outline: none;
-}
-.search-nav-item .form-control::placeholder {
-    color: #94a3b8;
-    font-weight: 400;
-}
+    <!-- ===== FOOTER ===== -->
+    <footer id="mainFooter" class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <a href="index.html" class="site-logo text-white">The<span class="text-green">Raptor</span></a>
+                    <p class="text-muted small mt-2">Independent, fact‑based journalism since 2012. Our team of 45 journalists operates across 20 countries.</p>
+                    <div>
+                        <a href="#" class="text-muted me-2" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" class="text-muted me-2" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-muted" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-bold">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="index.html" class="text-muted text-decoration-none">Homepage</a></li>
+                        <li><a href="blog.html" class="text-muted text-decoration-none">All Articles</a></li>
+                        <li><a href="about.html" class="text-muted text-decoration-none">Our Team</a></li>
+                        <li><a href="contact.html" class="text-muted text-decoration-none">Contact Us</a></li>
+                        <li><a href="coming-soon.html" class="text-muted text-decoration-none">Advertise</a></li>
+                        <li><a href="coming-soon.html" class="text-muted text-decoration-none">Careers</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-bold">Categories</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="blog.html?category=world" class="text-muted text-decoration-none">World</a> (126)</li>
+                        <li><a href="blog.html?category=technology" class="text-muted text-decoration-none">Technology</a> (98)</li>
+                        <li><a href="blog.html?category=business" class="text-muted text-decoration-none">Business</a> (74)</li>
+                        <li><a href="blog.html?category=sports" class="text-muted text-decoration-none">Sports</a> (52)</li>
+                        <li><a href="blog.html?category=culture" class="text-muted text-decoration-none">Culture</a> (43)</li>
+                        <li><a href="blog.html?category=science" class="text-muted text-decoration-none">Science</a> (38)</li>
+                        <li><a href="blog.html?category=health" class="text-muted text-decoration-none">Health</a> (31)</li>
+                        <li><a href="blog.html?category=travel" class="text-muted text-decoration-none">Travel</a> (27)</li>
+                    </ul>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="fw-bold">Get in Touch</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope text-muted"></i> <a href="mailto:info@theraptor.com" class="text-muted text-decoration-none">info@theraptor.com</a></li>
+                        <li><i class="fas fa-phone text-muted"></i> <span class="text-muted">+1 (555) 123-4567</span></li>
+                        <li><i class="fas fa-map-pin text-muted"></i> <span class="text-muted">123 News Avenue, NY</span></li>
+                        <li><i class="fas fa-clock text-muted"></i> <span class="text-muted">Mon–Fri: 8AM–10PM</span></li>
+                    </ul>
+                    <h5 class="fw-bold mt-3">Archives</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="coming-soon.html" class="text-muted text-decoration-none">2026</a> • <a href="coming-soon.html" class="text-muted text-decoration-none">2025</a> • <a href="coming-soon.html" class="text-muted text-decoration-none">2024</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="border-secondary" />
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted small mb-0">&copy; 2026 The Raptor Media Group. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="coming-soon.html" class="text-muted small text-decoration-none me-2">Privacy</a>
+                    <a href="coming-soon.html" class="text-muted small text-decoration-none me-2">Terms</a>
+                    <a href="coming-soon.html" class="text-muted small text-decoration-none me-2">Cookie Settings</a>
+                    <a href="coming-soon.html" class="text-muted small text-decoration-none me-2">Accessibility</a>
+                    <a href="coming-soon.html" class="text-muted small text-decoration-none">RSS</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-/* Search button */
-.search-nav-item .btn {
-    border-radius: 40px;
-    padding: 0.45rem 1.1rem;
-    background: #1e8449;
-    border: 1.5px solid #1e8449;
-    color: #fff;
-    font-size: 0.9rem;
-    transition: background 0.25s ease, border-color 0.25s ease, transform 0.15s ease;
-    flex-shrink: 0;
-}
-.search-nav-item .btn:hover,
-.search-nav-item .btn:focus {
-    background: #166b3a;
-    border-color: #166b3a;
-    transform: scale(1.02);
-}
-.search-nav-item .btn:active {
-    transform: scale(0.96);
-}
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-/* ----- DARK MODE TOGGLE – to the right of search button ----- */
-.search-nav-item #darkModeToggle {
-    border-radius: 40px;
-    padding: 0.4rem 0.9rem;
-    border: 1.5px solid #e2e8f0;
-    background: transparent;
-    color: #1a1a2e;
-    font-size: 1rem;
-    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.15s ease;
-    flex-shrink: 0;
-}
-.search-nav-item #darkModeToggle:hover,
-.search-nav-item #darkModeToggle:focus {
-    background: #f1f5f9;
-    border-color: #1e8449;
-    color: #1e8449;
-    transform: scale(1.04);
-}
-.search-nav-item #darkModeToggle:active {
-    transform: scale(0.94);
-}
-.search-nav-item #darkModeToggle i {
-    transition: transform 0.4s ease;
-}
-.search-nav-item #darkModeToggle:hover i {
-    transform: rotate(20deg);
-}
-
-/* ============================================================
-   RESPONSIVE ADJUSTMENTS
-   ============================================================ */
-
-/* Tablets and smaller */
-@media (max-width: 991.98px) {
-    .main-nav .nav-link {
-        font-size: 0.85rem;
-        padding: 0.3rem 0.1rem;
-    }
-    .search-nav-item {
-        max-width: 480px;
-        min-width: 260px;
-    }
-}
-
-/* Mobile landscape */
-@media (max-width: 767.98px) {
-    .site-header .row {
-        padding-bottom: 3.2rem;
-    }
-    .main-nav {
-        gap: 0.3rem 1rem;
-    }
-    .main-nav .nav-link {
-        font-size: 0.8rem;
-        padding: 0.25rem 0.1rem;
-    }
-    .search-nav-item {
-        max-width: 400px;
-        min-width: 220px;
-        gap: 0.35rem;
-    }
-    .search-nav-item .form-control {
-        font-size: 0.8rem;
-        padding: 0.35rem 0.8rem;
-        min-width: 100px;
-    }
-    .search-nav-item .btn {
-        font-size: 0.8rem;
-        padding: 0.35rem 0.8rem;
-    }
-    .search-nav-item #darkModeToggle {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.85rem;
-    }
-    .site-logo {
-        font-size: 1.3rem;
-    }
-}
-
-/* Small phones */
-@media (max-width: 575.98px) {
-    .site-header .row {
-        padding-bottom: 2.8rem;
-    }
-    .main-nav {
-        gap: 0.2rem 0.6rem;
-    }
-    .main-nav .nav-link {
-        font-size: 0.7rem;
-        padding: 0.2rem 0.05rem;
-        letter-spacing: 0;
-    }
-    .search-nav-item {
-        max-width: 320px;
-        min-width: 160px;
-        gap: 0.25rem;
-    }
-    .search-nav-item .form-control {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.6rem;
-        min-width: 70px;
-    }
-    .search-nav-item .btn {
-        font-size: 0.7rem;
-        padding: 0.25rem 0.6rem;
-    }
-    .search-nav-item #darkModeToggle {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    }
-}
-
-/* ============================================================
-   DARK MODE – applied via .dark-mode on <body>
-   ============================================================ */
-body.dark-mode {
-    background: #0f0f1a;
-    color: #e2e8f0;
-}
-
-body.dark-mode .site-header {
-    background: #181824;
-    border-bottom-color: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
-}
-
-body.dark-mode .site-logo {
-    color: #f1f5f9;
-}
-body.dark-mode .site-logo .text-green {
-    color: #4ade80;
-}
-
-body.dark-mode .main-nav .nav-link {
-    color: #cbd5e1;
-}
-body.dark-mode .main-nav .nav-link:hover,
-body.dark-mode .main-nav .nav-link:focus,
-body.dark-mode .main-nav .nav-link.active {
-    color: #4ade80;
-    border-bottom-color: #4ade80;
-}
-
-body.dark-mode .search-nav-item .form-control {
-    background: #1e1e2e;
-    border-color: #2d2d44;
-    color: #e2e8f0;
-}
-body.dark-mode .search-nav-item .form-control:focus {
-    border-color: #4ade80;
-    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
-    background: #25253a;
-}
-body.dark-mode .search-nav-item .form-control::placeholder {
-    color: #64748b;
-}
-
-body.dark-mode .search-nav-item .btn {
-    background: #4ade80;
-    border-color: #4ade80;
-    color: #0f0f1a;
-}
-body.dark-mode .search-nav-item .btn:hover,
-body.dark-mode .search-nav-item .btn:focus {
-    background: #22c55e;
-    border-color: #22c55e;
-}
-
-body.dark-mode .search-nav-item #darkModeToggle {
-    border-color: #2d2d44;
-    color: #cbd5e1;
-    background: transparent;
-}
-body.dark-mode .search-nav-item #darkModeToggle:hover,
-body.dark-mode .search-nav-item #darkModeToggle:focus {
-    background: #25253a;
-    border-color: #4ade80;
-    color: #4ade80;
-}
-
-/* Dark mode global overrides */
-body.dark-mode .bg-light {
-    background: #181824 !important;
-}
-body.dark-mode .text-muted {
-    color: #94a3b8 !important;
-}
-body.dark-mode .card {
-    background: #1e1e2e;
-    border-color: #2d2d44;
-    color: #e2e8f0;
-}
-body.dark-mode .card .text-muted {
-    color: #94a3b8 !important;
-}
-body.dark-mode .border-0.shadow-sm {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5) !important;
-}
+    <!-- Your main JavaScript file -->
+    <script src="js/script.js"></script>
+</body>
+</html>
