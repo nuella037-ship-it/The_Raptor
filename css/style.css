@@ -21,7 +21,7 @@
     align-items: center;
     justify-content: space-between;
     margin: 0;
-    padding-bottom: 3.8rem;      /* space for search row */
+    padding-bottom: 3.8rem;
     position: relative;
 }
 
@@ -41,9 +41,9 @@
     justify-content: flex-end;
 }
 
-/* Dark mode toggle – moved to search row, so hide the original column */
+/* Dark mode toggle – moved to search row, hide original */
 .site-header .col-6.col-lg-2 {
-    display: none;               /* hide the original dark mode column */
+    display: none;
 }
 
 /* ----- LOGO ----- */
@@ -103,12 +103,13 @@
     min-width: 320px;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
     padding: 0.35rem 0;
     background: inherit;
 }
 
-/* The search input itself */
+/* Search input – takes available space */
 .search-nav-item .form-control {
     flex: 1;
     border-radius: 40px;
@@ -117,6 +118,7 @@
     font-size: 0.9rem;
     background: #f8fafc;
     transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+    min-width: 180px;
 }
 .search-nav-item .form-control:focus {
     border-color: #1e8449;
@@ -150,7 +152,7 @@
     transform: scale(0.96);
 }
 
-/* ----- DARK MODE TOGGLE – positioned to the right of search ----- */
+/* ----- DARK MODE TOGGLE – to the right of search button ----- */
 .search-nav-item #darkModeToggle {
     border-radius: 40px;
     padding: 0.4rem 0.9rem;
@@ -160,6 +162,7 @@
     font-size: 1rem;
     transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.15s ease;
     flex-shrink: 0;
+    margin-left: 0;
 }
 .search-nav-item #darkModeToggle:hover,
 .search-nav-item #darkModeToggle:focus {
@@ -202,13 +205,14 @@
         padding: 0.25rem 0.1rem;
     }
     .search-nav-item {
-        min-width: 240px;
+        min-width: 220px;
         max-width: 420px;
         gap: 0.3rem;
     }
     .search-nav-item .form-control {
         font-size: 0.8rem;
         padding: 0.35rem 0.8rem;
+        min-width: 120px;
     }
     .search-nav-item .btn {
         font-size: 0.8rem;
@@ -227,19 +231,23 @@
     .site-header .row {
         padding-bottom: 2.8rem;
     }
+    .main-nav {
+        gap: 0.2rem 0.6rem;
+    }
     .main-nav .nav-link {
         font-size: 0.7rem;
         padding: 0.2rem 0.05rem;
         letter-spacing: 0;
     }
     .search-nav-item {
-        min-width: 180px;
-        max-width: 320px;
+        min-width: 160px;
+        max-width: 300px;
         gap: 0.2rem;
     }
     .search-nav-item .form-control {
         font-size: 0.7rem;
         padding: 0.25rem 0.6rem;
+        min-width: 80px;
     }
     .search-nav-item .btn {
         font-size: 0.7rem;
@@ -319,7 +327,7 @@ body.dark-mode .search-nav-item #darkModeToggle:focus {
     color: #4ade80;
 }
 
-/* ---------- Dark mode: global overrides ---------- */
+/* Dark mode global overrides */
 body.dark-mode .bg-light {
     background: #181824 !important;
 }
