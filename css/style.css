@@ -1,7 +1,7 @@
 /* ============================================================
    NAVBAR – Sticky, Horizontal
-   Logo left | Nav links + Dark mode right (top row)
-   Search bar centered below (absolute)
+   Logo left | Nav links right (top row)
+   Search + Dark mode centered together (bottom row)
    ============================================================ */
 
 .site-header {
@@ -14,37 +14,36 @@
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-/* ----- TOP ROW: Logo left, Nav right, Dark mode far right ----- */
+/* ----- TOP ROW: Logo left, Nav right ----- */
 .site-header .row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    position: relative;          /* anchor for absolute search */
-    padding-bottom: 3.6rem;      /* reserve space for the search bar */
     margin: 0;
+    padding-bottom: 3.8rem;      /* space for search row */
+    position: relative;
 }
 
 /* Logo – stays left */
 .site-header .col-6.col-lg-3 {
     flex: 0 0 auto;
     padding: 0;
+    order: 1;
 }
 
-/* Nav container – takes remaining space, pushes links to the right */
+/* Nav container – pushes links to the right */
 .site-header .col-lg-7 {
     flex: 1 1 auto;
     padding: 0;
+    order: 2;
     display: flex;
-    justify-content: flex-end;   /* align nav links to the right */
-    align-items: center;
+    justify-content: flex-end;
 }
 
-/* Dark mode container – sits to the right of nav, on the same row */
+/* Dark mode toggle – moved to search row, so hide the original column */
 .site-header .col-6.col-lg-2 {
-    flex: 0 0 auto;
-    padding: 0;
-    text-align: right;
+    display: none;               /* hide the original dark mode column */
 }
 
 /* ----- LOGO ----- */
@@ -65,7 +64,7 @@
 .main-nav {
     display: flex;
     align-items: center;
-    justify-content: flex-end;   /* links align to the right, next to dark mode */
+    justify-content: flex-end;
     flex-wrap: wrap;
     gap: 0.4rem 1.6rem;
     padding: 0.25rem 0;
@@ -93,21 +92,23 @@
     border-bottom-color: #1e8449;
 }
 
-/* ----- SEARCH BAR – centered right below the navbar ----- */
+/* ----- SEARCH + DARK MODE – centered together on bottom row ----- */
 .search-nav-item {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
-    top: 100%;                   /* sits directly under the header */
-    width: 90%;
-    max-width: 500px;
+    top: 100%;
+    width: auto;
+    max-width: 600px;
+    min-width: 320px;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.35rem 0;
-    background: inherit;         /* matches header background */
+    background: inherit;
 }
 
+/* The search input itself */
 .search-nav-item .form-control {
     flex: 1;
     border-radius: 40px;
@@ -128,6 +129,7 @@
     font-weight: 400;
 }
 
+/* Search button */
 .search-nav-item .btn {
     border-radius: 40px;
     padding: 0.45rem 1.1rem;
@@ -148,8 +150,8 @@
     transform: scale(0.96);
 }
 
-/* ----- DARK MODE TOGGLE – top right, opposite the logo ----- */
-#darkModeToggle {
+/* ----- DARK MODE TOGGLE – positioned to the right of search ----- */
+.search-nav-item #darkModeToggle {
     border-radius: 40px;
     padding: 0.4rem 0.9rem;
     border: 1.5px solid #e2e8f0;
@@ -157,21 +159,22 @@
     color: #1a1a2e;
     font-size: 1rem;
     transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease, transform 0.15s ease;
+    flex-shrink: 0;
 }
-#darkModeToggle:hover,
-#darkModeToggle:focus {
+.search-nav-item #darkModeToggle:hover,
+.search-nav-item #darkModeToggle:focus {
     background: #f1f5f9;
     border-color: #1e8449;
     color: #1e8449;
     transform: scale(1.04);
 }
-#darkModeToggle:active {
+.search-nav-item #darkModeToggle:active {
     transform: scale(0.94);
 }
-#darkModeToggle i {
+.search-nav-item #darkModeToggle i {
     transition: transform 0.4s ease;
 }
-#darkModeToggle:hover i {
+.search-nav-item #darkModeToggle:hover i {
     transform: rotate(20deg);
 }
 
@@ -182,7 +185,8 @@
         padding: 0.3rem 0.1rem;
     }
     .search-nav-item {
-        max-width: 400px;
+        min-width: 280px;
+        max-width: 500px;
     }
 }
 
@@ -198,14 +202,24 @@
         padding: 0.25rem 0.1rem;
     }
     .search-nav-item {
-        max-width: 340px;
+        min-width: 240px;
+        max-width: 420px;
+        gap: 0.3rem;
+    }
+    .search-nav-item .form-control {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+    }
+    .search-nav-item .btn {
+        font-size: 0.8rem;
+        padding: 0.35rem 0.8rem;
+    }
+    .search-nav-item #darkModeToggle {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.85rem;
     }
     .site-logo {
         font-size: 1.3rem;
-    }
-    #darkModeToggle {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.85rem;
     }
 }
 
@@ -219,20 +233,21 @@
         letter-spacing: 0;
     }
     .search-nav-item {
-        max-width: 260px;
-        gap: 0.3rem;
+        min-width: 180px;
+        max-width: 320px;
+        gap: 0.2rem;
     }
     .search-nav-item .form-control {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
     }
     .search-nav-item .btn {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.7rem;
-    }
-    #darkModeToggle {
+        font-size: 0.7rem;
         padding: 0.25rem 0.6rem;
-        font-size: 0.8rem;
+    }
+    .search-nav-item #darkModeToggle {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
     }
 }
 
@@ -292,13 +307,13 @@ body.dark-mode .search-nav-item .btn:focus {
     border-color: #22c55e;
 }
 
-body.dark-mode #darkModeToggle {
+body.dark-mode .search-nav-item #darkModeToggle {
     border-color: #2d2d44;
     color: #cbd5e1;
     background: transparent;
 }
-body.dark-mode #darkModeToggle:hover,
-body.dark-mode #darkModeToggle:focus {
+body.dark-mode .search-nav-item #darkModeToggle:hover,
+body.dark-mode .search-nav-item #darkModeToggle:focus {
     background: #25253a;
     border-color: #4ade80;
     color: #4ade80;
