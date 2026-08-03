@@ -178,7 +178,6 @@ function renderSingleArticle(containerId = 'blogArticlesContainer') {
     const articleId = parseInt(urlParams.get('id'));
 
     if (!articleId) {
-        // No ID in URL, show regular blog list
         renderBlogArticles(containerId, 'all', 1);
         return;
     }
@@ -190,27 +189,43 @@ function renderSingleArticle(containerId = 'blogArticlesContainer') {
     }
 
     const image = article.image || 'https://picsum.photos/seed/default/800/400';
-    const content = article.content || article.excerpt || '';
+    let content = article.content || article.excerpt || '';
+
+    // --- Format content: convert newlines to paragraphs ---
+    // If there are double newlines, split into paragraphs
+    if (content.includes('\n\n')) {
+        const paragraphs = content.split('\n\n').filter(p => p.trim() !== '');
+        content = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    } else {
+        // Otherwise, replace single newlines with <br>
+        content = content.replace(/\n/g, '<br>');
+    }
 
     container.innerHTML = `
         <div class="col-12">
-            <a href="blog.html" class="btn btn-outline-primary mb-4"><i class="fas fa-arrow-left"></i> Back to all articles</a>
-            <div class="article-single">
-                <img src="${image}" alt="${article.title}" class="img-fluid rounded-3 mb-4" style="max-height:400px;width:100%;object-fit:cover;" />
-                <span class="badge bg-primary mb-2">${article.category || 'Uncategorized'}</span>
-                <h1 class="fw-bold">${article.title}</h1>
-                <div class="text-muted small mb-3">
-                    By <strong>${article.author || 'Unknown'}</strong> • ${article.date || 'Recent'} 
-                    ${article.readTime ? `• ${article.readTime}` : ''}
-                    ${article.comments ? `• <i class="fas fa-comment"></i> ${article.comments} comments` : ''}
-                </div>
-                <div class="article-content" style="font-size:1.1rem;line-height:1.8;">${content}</div>
-                ${article.tags && article.tags.length > 0 ? `<div class="mt-4"><strong>Tags:</strong> ${article.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}</div>` : ''}
+            <div class="article-single-wrapper">
+                <a href="blog.html" class="btn btn-outline-primary back-btn mb-4"><i class="fas fa-arrow-left"></i> Back to all articles</a>
+                <article class="article-single">
+                    <img src="${image}" alt="${article.title}" class="img-fluid featured-image" />
+                    <div class="article-header">
+                        <div class="article-meta">
+                            <span class="badge bg-primary category-badge">${article.category || 'Uncategorized'}</span>
+                            <span class="meta-text"><i class="far fa-user"></i> ${article.author || 'Unknown'}</span>
+                            <span class="meta-text"><i class="far fa-calendar-alt"></i> ${article.date || 'Recent'}</span>
+                            ${article.readTime ? `<span class="meta-text"><i class="far fa-clock"></i> ${article.readTime}</span>` : ''}
+                            ${article.comments ? `<span class="meta-text"><i class="far fa-comment"></i> ${article.comments} comments</span>` : ''}
+                        </div>
+                        <h1 class="article-title">${article.title}</h1>
+                    </div>
+                    <div class="article-body">
+                        ${content}
+                    </div>
+                    ${article.tags && article.tags.length > 0 ? `<div class="article-tags"><strong>Tags:</strong> ${article.tags.map(tag => `<span class="badge bg-secondary tag-badge">${tag}</span>`).join(' ')}</div>` : ''}
+                </article>
             </div>
         </div>
     `;
 }
-
 function renderLatest(containerId = 'latestArticlesContainer', limit = 6) {
     const container = document.getElementById(containerId);
     if (!container) return;
