@@ -4,11 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>The Raptor – Home</title>
-    <!-- Bootstrap & Fonts -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <!-- Main custom styles -->
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -26,7 +24,6 @@
                         <a href="blog.html" class="nav-link">Blog</a>
                         <a href="about.html" class="nav-link">About</a>
                         <a href="contact.html" class="nav-link">Contact</a>
-                        <!-- Search input -->
                         <div class="search-nav-item">
                             <label for="navSearchInput" class="visually-hidden">Search articles</label>
                             <input type="text" id="navSearchInput" class="form-control form-control-sm" placeholder="Search articles..." aria-label="Search articles" />
@@ -39,7 +36,6 @@
                     <button id="mobileMenuToggle" class="btn btn-outline-secondary btn-sm d-md-none" aria-label="Toggle mobile navigation"><i class="fas fa-bars"></i></button>
                 </div>
             </div>
-            <!-- Mobile Nav -->
             <div id="mobileNav" class="d-md-none" style="display:none;">
                 <nav class="mobile-nav py-3" aria-label="Mobile navigation">
                     <a href="index.html" class="nav-link active">Home</a>
@@ -53,39 +49,40 @@
                     </div>
                 </nav>
             </div>
-            <!-- Search Results Dropdown -->
             <div id="searchResultsContainer" class="search-results-dropdown" style="display:none;"></div>
         </div>
     </header>
 
-    <!-- ===== BREAKING NEWS ===== -->
+    <!-- ===== HERO – DYNAMIC ===== -->
     <section id="homeHero" class="hero-section py-4">
         <div class="container">
             <div class="breaking-news mb-4">
                 <span class="badge-danger"><i class="fas fa-bolt"></i> Breaking</span>
                 <span id="breakingText" class="ms-2">Loading breaking news...</span>
             </div>
-            <div class="row g-4 align-items-center">
-                <div class="col-md-6">
-                    <img src="https://images.unsplash.com/photo-1569163139599-0f4517e36f51?w=800&h=500&fit=crop" alt="Climate Summit" class="img-fluid rounded-3" />
-                </div>
-                <div class="col-md-6">
-                    <span class="badge bg-primary me-2">Exclusive</span>
-                    <span class="badge bg-secondary">May 18, 2026</span>
-                    <h2 class="hero-title mt-2">Global Climate Summit Reaches Historic Agreement</h2>
-                    <div class="article-meta text-muted small mb-3">
-                        By <strong>Elena Rodriguez</strong> • 5 min read • <i class="fas fa-comment"></i> 142 comments
+            <div class="row g-4 align-items-center" id="heroRow">
+                <!-- Populated by JavaScript -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading featured article...</span>
                     </div>
-                    <p>In a landmark turn of events, representatives from 195 nations have unanimously pledged to cut carbon emissions by 50% by 2030…</p>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check-circle text-green"></i> Binding emissions targets for every signatory</li>
-                        <li><i class="fas fa-check-circle text-green"></i> Phased elimination of fossil fuel subsidies by 2028</li>
-                        <li><i class="fas fa-check-circle text-green"></i> Mandatory reforestation commitments</li>
-                    </ul>
-                    <div class="d-flex gap-2">
-                        <a href="blog.html" class="btn btn-primary">Read full story →</a>
-                        <a href="#" class="btn btn-outline-secondary" aria-label="Share"><i class="fas fa-share-alt"></i> Share</a>
-                        <a href="#" class="btn btn-outline-secondary" aria-label="Save"><i class="fas fa-bookmark"></i> Save</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CATEGORIES – DYNAMIC ===== -->
+    <section id="categoriesSection" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Explore <span class="text-green">Categories</span></h2>
+                <p class="text-muted">Find the topics that matter to you</p>
+            </div>
+            <div class="row g-4" id="categoriesContainer">
+                <!-- All categories populated by JavaScript -->
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading categories...</span>
                     </div>
                 </div>
             </div>
@@ -100,32 +97,11 @@
                 <a href="blog.html" class="btn btn-outline-primary">View all articles <i class="fas fa-arrow-right"></i></a>
             </div>
             <div class="row g-4" id="latestArticlesContainer">
-                <!-- Loading spinner -->
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===== CATEGORIES ===== -->
-    <section id="categoriesSection" class="py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="fw-bold">Explore <span class="text-green">Categories</span></h2>
-                <p class="text-muted">Find the topics that matter to you</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-6 col-md-3"><a href="blog.html?category=world" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-globe-americas text-primary fa-2x"></i><h5 class="mt-2">World News</h5><span class="text-muted small">126 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=technology" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-microchip text-green fa-2x"></i><h5 class="mt-2">Technology</h5><span class="text-muted small">98 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=business" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-chart-pie text-primary fa-2x"></i><h5 class="mt-2">Business</h5><span class="text-muted small">74 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=sports" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-football-ball text-green fa-2x"></i><h5 class="mt-2">Sports</h5><span class="text-muted small">52 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=culture" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-paint-brush text-primary fa-2x"></i><h5 class="mt-2">Culture</h5><span class="text-muted small">43 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=science" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-flask text-green fa-2x"></i><h5 class="mt-2">Science</h5><span class="text-muted small">38 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=health" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-heartbeat text-primary fa-2x"></i><h5 class="mt-2">Health</h5><span class="text-muted small">31 articles</span></a></div>
-                <div class="col-6 col-md-3"><a href="blog.html?category=travel" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none"><i class="fas fa-plane text-green fa-2x"></i><h5 class="mt-2">Travel</h5><span class="text-muted small">27 articles</span></a></div>
             </div>
         </div>
     </section>
@@ -138,7 +114,6 @@
                 <span class="text-muted">Most discussed stories today</span>
             </div>
             <div class="row g-4" id="trendingContainer">
-                <!-- Loading spinner -->
                 <div class="col-12 text-center py-5">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -191,7 +166,7 @@
         </div>
     </section>
 
-    <!-- ===== FOOTER (same as other pages) ===== -->
+    <!-- ===== FOOTER ===== -->
     <footer id="mainFooter" class="py-5 bg-dark text-white">
         <div class="container">
             <div class="row g-4">
@@ -206,7 +181,8 @@
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <h5 class="fw-bold">Categories</h5>
-                    <ul class="list-unstyled"><li><a href="blog.html?category=world" class="text-muted text-decoration-none">World</a> (126)</li><li><a href="blog.html?category=technology" class="text-muted text-decoration-none">Technology</a> (98)</li><li><a href="blog.html?category=business" class="text-muted text-decoration-none">Business</a> (74)</li><li><a href="blog.html?category=sports" class="text-muted text-decoration-none">Sports</a> (52)</li><li><a href="blog.html?category=culture" class="text-muted text-decoration-none">Culture</a> (43)</li><li><a href="blog.html?category=science" class="text-muted text-decoration-none">Science</a> (38)</li><li><a href="blog.html?category=health" class="text-muted text-decoration-none">Health</a> (31)</li><li><a href="blog.html?category=travel" class="text-muted text-decoration-none">Travel</a> (27)</li></ul>
+                    <!-- Dynamically populated by JavaScript -->
+                    <ul class="list-unstyled" id="footerCategoryList"></ul>
                 </div>
                 <div class="col-md-6 col-lg-3">
                     <h5 class="fw-bold">Get in Touch</h5>
