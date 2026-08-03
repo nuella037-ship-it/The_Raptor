@@ -1,675 +1,519 @@
 // ============================================================
-//  SUPABASE CONFIG – REPLACE WITH YOUR ACTUAL KEYS
+// SUPABASE CONFIG
 // ============================================================
 const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
-
-// Initialize Supabase client
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-window.supabaseClient = supabase;
 
-// ============================================
-//  GLOBALS
-// ============================================
-let currentCategory = 'all';
-let allArticles = [];
-let searchTimeout = null;
-
-// ============================================
-//  FETCH ARTICLES FROM SUPABASE
-// ============================================
-async function fetchArticles(category = 'all') {
-    if (!window.supabaseClient) {
-        console.error('Supabase client not initialized.');
-        return [];
+// ============================================================
+// MOCK DATA (fallback if Supabase fails)
+// ============================================================
+const mockArticles = [
+    {
+        id: 1,
+        title: "AI Breakthrough in Medical Imaging Detects Early-Stage Cancers",
+        category: "Technology",
+        excerpt: "Researchers at Stanford have developed a new deep-learning model that analyses MRI and CT scans with 98.7% accuracy…",
+        content: "Full content here...",
+        author: "Dr. Elena Moore",
+        date: "May 17, 2026",
+        image: "https://picsum.photos/seed/tech/600/300",
+        tags: ["AI", "Healthcare"],
+        featured: true,
+        trending: true
+    },
+    {
+        id: 2,
+        title: "Global Markets Rally as Tech Giants Post Record Earnings",
+        category: "Business",
+        excerpt: "The S&P 500 and NASDAQ surged over 3% after Apple, Microsoft, and Nvidia reported quarterly results…",
+        content: "Full content here...",
+        author: "James Carter",
+        date: "May 16, 2026",
+        image: "https://picsum.photos/seed/business/600/300",
+        tags: ["Finance", "Stocks"],
+        featured: false,
+        trending: true
+    },
+    {
+        id: 3,
+        title: "Champions League Final: Underdogs Stun Favourites in Extra Time",
+        category: "Sports",
+        excerpt: "In one of the most dramatic finals in recent memory, Borussia Dortmund defeated Real Madrid 3–2…",
+        content: "Full content here...",
+        author: "Maria Santos",
+        date: "May 15, 2026",
+        image: "https://picsum.photos/seed/sports/600/300",
+        tags: ["Football", "UEFA"],
+        featured: false,
+        trending: true
+    },
+    {
+        id: 4,
+        title: "Street Art Festival Transforms Downtown with 50+ Murals",
+        category: "Culture",
+        excerpt: "Over 150 international artists descended on the city for the annual Mural Fest…",
+        content: "Full content here...",
+        author: "Liam O'Brien",
+        date: "May 14, 2026",
+        image: "https://picsum.photos/seed/culture/600/300",
+        tags: ["Art", "Community"],
+        featured: false,
+        trending: false
+    },
+    {
+        id: 5,
+        title: "Scientists Successfully Grow Mini-Brains with Functional Neural Networks",
+        category: "Science",
+        excerpt: "In a groundbreaking study published in Nature, a team from MIT has cultivated cerebral organoids…",
+        content: "Full content here...",
+        author: "Dr. Aisha Khan",
+        date: "May 13, 2026",
+        image: "https://picsum.photos/seed/science/600/300",
+        tags: ["Neuroscience", "Research"],
+        featured: false,
+        trending: false
     }
+];
+
+// Global articles array (will be populated from Supabase or mock)
+let allArticles = [];
+
+// ============================================================
+// FETCH ARTICLES
+// ============================================================
+async function fetchArticles() {
     try {
-        let query = window.supabaseClient
+        const { data, error } = await supabase
             .from('articles')
             .select('*')
             .order('created_at', { ascending: false });
-
-        if (category !== 'all') {
-            query = query.eq('category', category);
-        }
-
-        const { data, error } = await query;
         if (error) throw error;
-        return data || [];
-    } catch (err) {
-        console.error('Error fetching articles:', err);
-        return [];
-    }
-}
-
-// ============================================
-//  LOAD FUNCTIONS (called from HTML pages)
-// ============================================
-
-// ----- Homepage: Latest Stories -----
-async function loadLatestArticles() {
-    const container = document.getElementById('latestArticlesContainer');
-    if (!container) return;
-
-    try {
-        const articles = await fetchArticles('all');
-        const latest = articles.slice(0, 6);
-        allArticles = articles;
-
-        if (latest.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles yet. Check back soon!</div>`;
+        if (data && data.length > 0) {
+            allArticles = data;
             return;
         }
-
-        container.innerHTML = latest.map(article => `
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm">
-                    <img src="${article.image || 'https://picsum.photos/seed/' + article.category + '/600/300'}" class="card-img-top" alt="${article.title}" loading="lazy" />
-                    <div class="card-body">
-                        <span class="badge bg-primary mb-2">${article.category}</span>
-                        <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                        <div class="text-muted small">By <strong>${article.author || 'Editor'}</strong> • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
-                        <p class="card-text mt-2">${article.excerpt || article.content.substring(0, 120) + '…'}</p>
-                        <div class="d-flex justify-content-between text-muted small">
-                            <span><i class="fas fa-tag"></i> ${article.category}</span>
-                            <span><i class="fas fa-comment"></i> ${article.comments || 0}</span>
-                            <span><i class="fas fa-clock"></i> ${article.timeAgo || 'recent'}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error('Error loading latest articles:', err);
-        container.innerHTML = `<div class="col-12 text-center text-danger">Failed to load articles.</div>`;
+    } catch (e) {
+        console.warn('Supabase fetch failed, using mock data', e);
     }
+    // Fallback to mock
+    allArticles = mockArticles;
 }
 
-// ----- Homepage: Trending -----
-async function loadTrendingArticles() {
-    const container = document.getElementById('trendingContainer');
+// ============================================================
+// RENDER FUNCTIONS
+// ============================================================
+
+// Render a single article card (Bootstrap column)
+function renderArticleCard(article, colClass = 'col-md-6 col-lg-4') {
+    const image = article.image || 'https://picsum.photos/seed/default/600/300';
+    return `
+        <div class="${colClass}">
+            <div class="article-card">
+                <img src="${image}" alt="${article.title}" loading="lazy" />
+                <div class="card-body">
+                    <span class="badge bg-primary mb-2">${article.category}</span>
+                    <h5 class="card-title">${article.title}</h5>
+                    <p class="card-text">${article.excerpt || article.content?.substring(0, 120) || ''}…</p>
+                    <div class="card-meta">${article.author} • ${article.date}</div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// Render latest stories on homepage
+function renderLatest(containerId = 'latestArticlesContainer', limit = 6) {
+    const container = document.getElementById(containerId);
     if (!container) return;
-
-    try {
-        const articles = await fetchArticles('all');
-        const trending = articles.slice(0, 6);
-        const colors = ['bg-primary', 'bg-green', 'bg-primary', 'bg-green', 'bg-primary', 'bg-green'];
-
-        if (trending.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center text-muted py-3">No trending stories.</div>`;
-            return;
-        }
-
-        container.innerHTML = trending.map((article, index) => `
-            <div class="col-md-6">
-                <div class="d-flex gap-3 align-items-start">
-                    <span class="badge ${colors[index % colors.length]} rounded-circle p-3 fs-5">${String(index+1).padStart(2, '0')}</span>
-                    <div>
-                        <h5><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                        <span class="text-muted small">By ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</span>
-                        <p class="text-muted small">${article.excerpt || article.content.substring(0, 80) + '…'}</p>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error('Error loading trending:', err);
-        container.innerHTML = `<div class="col-12 text-center text-danger">Failed to load trending.</div>`;
+    const latest = allArticles.slice(0, limit);
+    if (latest.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No articles found.</div>`;
+        return;
     }
+    container.innerHTML = latest.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
 }
 
-// ----- Blog Page: Featured Story -----
-async function loadFeaturedArticle() {
-    const container = document.getElementById('featuredContainer');
+// Render trending on homepage or blog
+function renderTrending(containerId = 'trendingContainer', limit = 4) {
+    const container = document.getElementById(containerId);
     if (!container) return;
-
-    try {
-        const articles = await fetchArticles('all');
-        if (articles.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center text-muted py-5">No featured article available.</div>`;
-            return;
-        }
-
-        const featured = articles[0];
-
-        container.innerHTML = `
-            <div class="col-lg-6">
-                <img src="${featured.image || 'https://picsum.photos/seed/featured/800/500'}" alt="${featured.title}" class="img-fluid rounded-3 shadow featured-image" loading="lazy" />
-            </div>
-            <div class="col-lg-6">
-                <span class="badge bg-danger mb-2">Featured</span>
-                <h2 class="fw-bold">${featured.title}</h2>
-                <div class="text-muted small">
-                    By <strong>${featured.author || 'Editor'}</strong> • ${featured.date || new Date(featured.created_at).toLocaleDateString()} • ${featured.readTime || '5 min read'} • <i class="fas fa-comment"></i> ${featured.comments || 0} comments
-                </div>
-                <p>${featured.excerpt || featured.content.substring(0, 200) + '…'}</p>
-                <a href="#" class="btn btn-primary">Read full story →</a>
-            </div>
-        `;
-    } catch (err) {
-        console.error('Error loading featured:', err);
-        container.innerHTML = `<div class="col-12 text-center text-danger">Failed to load featured article.</div>`;
+    const trending = allArticles.filter(a => a.trending).slice(0, limit);
+    if (trending.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No trending stories.</div>`;
+        return;
     }
+    container.innerHTML = trending.map(a => renderArticleCard(a, 'col-md-6 col-lg-3')).join('');
 }
 
-// ----- Blog Page: Article Grid (with category filter) -----
-async function loadBlogArticles(category = 'all') {
-    const container = document.getElementById('blogArticlesContainer');
-    const countDisplay = document.getElementById('resultCount');
+// Render blog articles with category filter
+let currentCategory = 'all';
+let filteredArticles = [];
+
+function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'all') {
+    const container = document.getElementById(containerId);
     if (!container) return;
-
-    try {
-        currentCategory = category;
-        const articles = await fetchArticles(category);
-        allArticles = articles;
-
-        if (articles.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles found in this category.</div>`;
-            if (countDisplay) countDisplay.textContent = 'Showing 0 articles';
-            return;
-        }
-
-        if (countDisplay) {
-            countDisplay.textContent = `Showing ${articles.length} articles`;
-            const articleCountSpan = document.getElementById('articleCount');
-            if (articleCountSpan) articleCountSpan.textContent = articles.length;
-            const lastUpdatedSpan = document.getElementById('lastUpdated');
-            if (lastUpdatedSpan && articles.length > 0) {
-                const latestDate = new Date(articles[0].created_at);
-                lastUpdatedSpan.textContent = latestDate.toLocaleString();
-            }
-        }
-
-        container.innerHTML = articles.map(article => `
-            <div class="col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm position-relative">
-                    <span class="article-category">${article.category}</span>
-                    <img src="${article.image || 'https://picsum.photos/seed/' + article.category + '/600/300'}" class="card-img-top" alt="${article.title}" loading="lazy" />
-                    <div class="card-body">
-                        <h5 class="card-title"><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                        <div class="text-muted small">By <strong>${article.author || 'Editor'}</strong> • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
-                        <p class="card-text mt-2">${article.excerpt || article.content.substring(0, 120) + '…'}</p>
-                        <div class="d-flex justify-content-between text-muted small">
-                            <span><i class="fas fa-tag"></i> ${article.category}</span>
-                            <span><i class="fas fa-comment"></i> ${article.comments || 0}</span>
-                            <span><i class="fas fa-clock"></i> ${article.timeAgo || 'recent'}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-
-        // Update active filter button
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active', 'btn-primary');
-            btn.classList.add('btn-outline-primary');
-            if (btn.dataset.category === category) {
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-primary', 'active');
-            }
-        });
-    } catch (err) {
-        console.error('Error loading blog articles:', err);
-        container.innerHTML = `<div class="col-12 text-center text-danger">Failed to load articles.</div>`;
+    currentCategory = category;
+    if (category === 'all') {
+        filteredArticles = allArticles;
+    } else {
+        filteredArticles = allArticles.filter(a => a.category.toLowerCase() === category.toLowerCase());
     }
+    if (filteredArticles.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles in this category.</div>`;
+        document.getElementById('resultCount').textContent = `Showing 0 articles`;
+        return;
+    }
+    container.innerHTML = filteredArticles.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
+    document.getElementById('resultCount').textContent = `Showing ${filteredArticles.length} articles`;
 }
 
-// ----- Blog Page: Trending (separate from homepage) -----
-async function loadTrendingArticlesBlog() {
-    const container = document.getElementById('trendingContainerBlog');
+// Render featured story on blog page
+function renderFeatured(containerId = 'featuredContainer') {
+    const container = document.getElementById(containerId);
     if (!container) return;
-
-    try {
-        const articles = await fetchArticles('all');
-        const trending = articles.slice(0, 6);
-        const colors = ['bg-primary', 'bg-green', 'bg-primary', 'bg-green', 'bg-primary', 'bg-green'];
-
-        if (trending.length === 0) {
-            container.innerHTML = `<div class="col-12 text-center text-muted py-3">No trending stories.</div>`;
-            return;
-        }
-
-        container.innerHTML = trending.map((article, index) => `
-            <div class="col-md-6">
-                <div class="d-flex gap-3 align-items-start">
-                    <span class="badge ${colors[index % colors.length]} rounded-circle p-3 fs-5">${String(index+1).padStart(2, '0')}</span>
-                    <div>
-                        <h5><a href="#" class="text-decoration-none text-dark">${article.title}</a></h5>
-                        <span class="text-muted small">By ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</span>
-                        <p class="text-muted small">${article.excerpt || article.content.substring(0, 80) + '…'}</p>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error('Error loading trending blog:', err);
-        container.innerHTML = `<div class="col-12 text-center text-danger">Failed to load trending.</div>`;
+    const featured = allArticles.find(a => a.featured === true) || allArticles[0];
+    if (!featured) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No featured story.</div>`;
+        return;
     }
+    container.innerHTML = `
+        <div class="col-md-6">
+            <img src="${featured.image || 'https://picsum.photos/seed/featured/600/400'}" alt="${featured.title}" class="img-fluid rounded-3" />
+        </div>
+        <div class="col-md-6">
+            <span class="badge bg-primary mb-2">Featured</span>
+            <h2 class="fw-bold">${featured.title}</h2>
+            <p>${featured.excerpt || featured.content?.substring(0, 200) || ''}…</p>
+            <div class="text-muted small">${featured.author} • ${featured.date}</div>
+            <a href="blog.html" class="btn btn-primary mt-2">Read more</a>
+        </div>
+    `;
 }
 
-// ============================================
-//  SEARCH FUNCTIONALITY (all search inputs)
-// ============================================
-async function performSearch(query) {
+// ============================================================
+// BREAKING NEWS TICKER
+// ============================================================
+function updateBreakingNews() {
+    const el = document.getElementById('breakingText');
+    if (!el) return;
+    if (allArticles.length === 0) {
+        el.textContent = 'No breaking news at the moment.';
+        return;
+    }
+    // Use the latest article as breaking, or pick one with a 'breaking' flag
+    const breaking = allArticles.find(a => a.breaking) || allArticles[0];
+    el.textContent = breaking.title;
+}
+
+// ============================================================
+// SEARCH
+// ============================================================
+function performSearch(query) {
     const container = document.getElementById('searchResultsContainer');
     if (!container) return;
-
-    if (!query || query.trim().length === 0) {
+    const q = query.trim().toLowerCase();
+    if (q.length === 0) {
         container.style.display = 'none';
         return;
     }
-
-    const q = query.trim().toLowerCase();
-
-    // If we haven't loaded all articles yet, fetch them
-    if (allArticles.length === 0) {
-        allArticles = await fetchArticles('all');
-    }
-
     const results = allArticles.filter(article =>
         article.title.toLowerCase().includes(q) ||
-        article.content.toLowerCase().includes(q) ||
-        article.category.toLowerCase().includes(q) ||
-        (article.author && article.author.toLowerCase().includes(q)) ||
-        (article.tags && Array.isArray(article.tags) && article.tags.some(tag => tag.toLowerCase().includes(q)))
+        article.excerpt?.toLowerCase().includes(q) ||
+        article.content?.toLowerCase().includes(q) ||
+        article.category?.toLowerCase().includes(q) ||
+        article.author?.toLowerCase().includes(q) ||
+        (article.tags && article.tags.some(tag => tag.toLowerCase().includes(q)))
     );
-
     if (results.length === 0) {
-        container.innerHTML = `<div class="p-3 text-muted">No articles found for "<strong>${q}</strong>".</div>`;
+        container.innerHTML = '<div class="p-2 text-muted">No articles found.</div>';
         container.style.display = 'block';
         return;
     }
-
     let html = '';
-    results.slice(0, 10).forEach(article => {
+    results.slice(0, 8).forEach(article => {
         html += `
             <div class="result-item">
-                <div class="result-title">${article.title}</div>
-                <div class="result-meta">${article.category} • ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}</div>
+                <div class="result-title"><a href="blog.html" class="text-decoration-none">${article.title}</a></div>
+                <div class="result-meta">${article.category} • ${article.author} • ${article.date}</div>
             </div>
         `;
     });
-    if (results.length > 10) {
-        html += `<div class="result-item text-muted small">… and ${results.length - 10} more</div>`;
-    }
     container.innerHTML = html;
     container.style.display = 'block';
 }
 
-function hideSearchResults() {
-    const container = document.getElementById('searchResultsContainer');
-    if (container) container.style.display = 'none';
-}
-
-function initSearch() {
-    const searchInputs = [
-        document.getElementById('navSearchInput'),
-        document.getElementById('mobileSearchInput')
-    ];
-
-    searchInputs.forEach(input => {
-        if (!input) return;
-
-        // Debounced input handler
-        input.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            const query = this.value;
-            searchTimeout = setTimeout(() => {
-                performSearch(query);
-            }, 300);
-        });
-
-        // Close on blur with delay (allow click on results)
-        input.addEventListener('blur', function() {
-            setTimeout(hideSearchResults, 300);
-        });
-
-        // Show results on focus if there's a query
-        input.addEventListener('focus', function() {
-            if (this.value.trim().length > 0) {
-                performSearch(this.value);
-            }
-        });
-
-        // Clear search on escape key
-        input.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                this.value = '';
-                hideSearchResults();
-                this.blur();
-            }
-        });
-    });
-
-    // Close search results when clicking outside
-    document.addEventListener('click', function(e) {
-        const container = document.getElementById('searchResultsContainer');
-        if (container && !container.contains(e.target) &&
-            !e.target.closest('.search-nav-item') &&
-            !e.target.closest('.search-mobile')) {
-            hideSearchResults();
-        }
-    });
-}
-
-// ============================================
-//  CATEGORY FILTER BUTTONS
-// ============================================
-function initCategoryFilters() {
-    const buttons = document.querySelectorAll('.filter-btn');
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.dataset.category;
-            loadBlogArticles(category);
-            // Scroll to articles section
-            const grid = document.getElementById('articleGrid');
-            if (grid) {
-                grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
-
-    // Check for category parameter in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category');
-    if (categoryParam) {
-        // Find and click the matching filter button
-        const matchingBtn = Array.from(buttons).find(btn => btn.dataset.category.toLowerCase() === categoryParam.toLowerCase());
-        if (matchingBtn) {
-            matchingBtn.click();
-        } else {
-            // If no matching button, load the category anyway
-            loadBlogArticles(categoryParam);
-        }
-    }
-}
-
-// ============================================
-//  DARK MODE TOGGLE
-// ============================================
+// ============================================================
+// DARK MODE
+// ============================================================
 function initDarkMode() {
     const toggle = document.getElementById('darkModeToggle');
     if (!toggle) return;
-
-    // Load saved preference
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode === 'true') {
+    if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
-        const icon = toggle.querySelector('i');
-        if (icon) icon.className = 'fas fa-sun';
+        toggle.querySelector('i').className = 'fas fa-sun';
     }
-
     toggle.addEventListener('click', function() {
-        const isDark = document.body.classList.toggle('dark-mode');
+        document.body.classList.toggle('dark-mode');
         const icon = this.querySelector('i');
-        if (isDark) {
-            icon.className = 'fas fa-sun';
-        } else {
-            icon.className = 'fas fa-moon';
-        }
+        const isDark = document.body.classList.contains('dark-mode');
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         localStorage.setItem('darkMode', isDark);
     });
 }
 
-// ============================================
-//  MOBILE MENU TOGGLE – FIXED (no inline styles)
-// ============================================
+// ============================================================
+// MOBILE MENU
+// ============================================================
 function initMobileMenu() {
     const toggle = document.getElementById('mobileMenuToggle');
     const nav = document.getElementById('mobileNav');
-
     if (!toggle || !nav) return;
-
-    // Remove any leftover inline style that might interfere
-    nav.style.display = '';
-
-    toggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const isOpen = nav.classList.toggle('open');
-        this.setAttribute('aria-expanded', isOpen);
-        // No inline display manipulation – CSS handles visibility via .open class
+    toggle.addEventListener('click', function() {
+        const isOpen = nav.style.display === 'block';
+        nav.style.display = isOpen ? 'none' : 'block';
+        this.setAttribute('aria-expanded', !isOpen);
     });
-
-    // Close when a nav link is clicked
-    nav.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', function() {
-            nav.classList.remove('open');
-            toggle.setAttribute('aria-expanded', 'false');
-        });
-    });
-
-    // Auto-close on resize to desktop (≥992px)
     window.addEventListener('resize', function() {
-        if (window.innerWidth >= 992) {
-            nav.classList.remove('open');
+        if (window.innerWidth >= 768) {
+            nav.style.display = 'none';
             toggle.setAttribute('aria-expanded', 'false');
         }
     });
 }
 
-// ============================================
-//  CONTACT FORM (send to Supabase)
-// ============================================
-async function submitContactForm(formData) {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('contact_messages')
-            .insert([{
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone || null,
-                subject: formData.subject,
-                message: formData.message
-            }])
-            .select();
+// ============================================================
+// SEARCH EVENTS
+// ============================================================
+function initSearchEvents() {
+    const navInput = document.getElementById('navSearchInput');
+    const navBtn = document.getElementById('navSearchBtn');
+    const mobileInput = document.getElementById('mobileSearchInput');
+    const mobileBtn = document.getElementById('mobileSearchBtn');
+    const container = document.getElementById('searchResultsContainer');
 
-        if (error) throw error;
-        return { success: true, data };
-    } catch (err) {
-        console.error('Contact form error:', err);
-        return { success: false, error: err.message };
+    if (!container) return;
+
+    function handleSearch(input) {
+        if (input) performSearch(input.value);
     }
-}
 
-// ============================================
-//  NEWSLETTER SUBSCRIPTION
-// ============================================
-async function subscribeNewsletter(email, frequency = 'daily') {
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('newsletter_subscribers')
-            .insert([{ email, frequency }])
-            .select();
-
-        if (error) {
-            if (error.code === '23505') {
-                return { success: false, message: 'You are already subscribed!' };
-            }
-            throw error;
+    if (navInput) {
+        navInput.addEventListener('input', function() { handleSearch(this); });
+        navInput.addEventListener('blur', function() { setTimeout(() => { container.style.display = 'none'; }, 300); });
+        navInput.addEventListener('focus', function() { if (this.value.length > 0) handleSearch(this); });
+        if (navBtn) navBtn.addEventListener('click', function(e) { e.preventDefault(); handleSearch(navInput); });
+    }
+    if (mobileInput) {
+        mobileInput.addEventListener('input', function() { handleSearch(this); });
+        if (mobileBtn) mobileBtn.addEventListener('click', function(e) { e.preventDefault(); handleSearch(mobileInput); });
+    }
+    // Close on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#searchResultsContainer') && !e.target.closest('.search-nav-item') && !e.target.closest('.search-mobile')) {
+            container.style.display = 'none';
         }
-        return { success: true, data };
-    } catch (err) {
-        console.error('Newsletter error:', err);
-        return { success: false, error: err.message };
+    });
+}
+
+// ============================================================
+// NEWSLETTER FORM
+// ============================================================
+async function subscribeNewsletter(email, frequency) {
+    try {
+        const { error } = await supabase
+            .from('newsletter_subscribers')
+            .insert([{ email, frequency }]);
+        if (error) {
+            if (error.code === '23505') return { success: false, message: 'You are already subscribed!' };
+            return { success: false, error: error.message };
+        }
+        return { success: true };
+    } catch (e) {
+        // Fallback: store in localStorage
+        let subs = JSON.parse(localStorage.getItem('newsletter_subs') || '[]');
+        if (subs.find(s => s.email === email)) {
+            return { success: false, message: 'You are already subscribed!' };
+        }
+        subs.push({ email, frequency, created_at: new Date().toISOString() });
+        localStorage.setItem('newsletter_subs', JSON.stringify(subs));
+        return { success: true };
     }
 }
 
-// ============================================
-//  NEWSLETTER & CONTACT FORMS (INIT)
-// ============================================
-function initForms() {
-    // --- NEWSLETTER FORM ---
-    document.querySelectorAll('#newsletterForm').forEach(form => {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
+function initNewsletter() {
+    const form = document.getElementById('newsletterForm');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletterEmail');
+        const selectInput = document.getElementById('newsletterFrequency');
+        const email = emailInput.value.trim();
+        const frequency = selectInput ? selectInput.value : 'daily';
 
-            const emailInput = this.querySelector('input[type="email"]');
-            const selectInput = this.querySelector('select');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showToast('Please enter a valid email address.', 'error');
+            emailInput.focus();
+            return;
+        }
 
-            if (!emailInput || !emailInput.value.trim()) {
-                showToast('Please enter your email address.', 'error');
-                emailInput?.focus();
-                return;
-            }
+        const submitBtn = document.getElementById('newsletterSubmitBtn');
+        const text = document.getElementById('newsletterSubmitText');
+        const spinner = document.getElementById('newsletterSubmitSpinner');
+        text.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
 
-            const email = emailInput.value.trim();
-            const frequency = selectInput ? selectInput.value : 'daily';
+        const result = await subscribeNewsletter(email, frequency);
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showToast('Please enter a valid email address.', 'error');
-                emailInput.focus();
-                return;
-            }
+        text.classList.remove('d-none');
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
 
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subscribing...';
+        if (result.success) {
+            document.getElementById('newsletterSuccess').classList.remove('d-none');
+            form.reset();
+            showToast('You\'re on the list!', 'success');
+        } else {
+            showToast(result.message || 'Something went wrong.', 'error');
+        }
+    });
+}
 
-            const result = await subscribeNewsletter(email, frequency);
+// ============================================================
+// CONTACT FORM
+// ============================================================
+function initContactForm() {
+    const form = document.getElementById('contactForm');
+    if (!form) return;
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('contactName').value.trim();
+        const email = document.getElementById('contactEmail').value.trim();
+        const phone = document.getElementById('contactPhone').value.trim();
+        const subject = document.getElementById('contactSubject').value;
+        const message = document.getElementById('contactMessage').value.trim();
+        const agree = document.getElementById('agreeCheck').checked;
+        const newsletter = document.getElementById('newsletterOptIn')?.checked || false;
 
+        if (!name || !email || !subject || !message || !agree) {
+            showToast('Please fill in all required fields.', 'error');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showToast('Please enter a valid email address.', 'error');
+            return;
+        }
+
+        const submitBtn = document.getElementById('contactSubmitBtn');
+        const text = document.getElementById('contactSubmitText');
+        const spinner = document.getElementById('contactSubmitSpinner');
+        text.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+
+        try {
+            const { error } = await supabase
+                .from('contact_messages')
+                .insert([{ name, email, phone, subject, message, newsletter_optin: newsletter }]);
+            if (error) throw error;
+            document.getElementById('contactSuccess').classList.remove('d-none');
+            form.reset();
+            showToast('Message sent! We\'ll get back to you soon.', 'success');
+        } catch (e) {
+            showToast('Failed to send. Please try again later.', 'error');
+        } finally {
+            text.classList.remove('d-none');
+            spinner.classList.add('d-none');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+        }
+    });
+}
 
-            if (result.success) {
-                showToast('🎉 Thank you for subscribing to The Raptor newsletter!', 'success');
-                this.reset();
-            } else {
-                showToast(result.message || '❌ Something went wrong. Please try again.', 'error');
-            }
+// ============================================================
+// BLOG CATEGORY FILTERS
+// ============================================================
+function setupCategoryFilters() {
+    const buttons = document.querySelectorAll('.filter-btn');
+    if (!buttons.length) return;
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.dataset.category;
+            buttons.forEach(b => {
+                b.classList.remove('btn-primary');
+                b.classList.add('btn-outline-primary');
+                b.setAttribute('aria-pressed', 'false');
+            });
+            this.classList.remove('btn-outline-primary');
+            this.classList.add('btn-primary');
+            this.setAttribute('aria-pressed', 'true');
+            renderBlogArticles('blogArticlesContainer', category);
         });
     });
-
-    // --- CONTACT FORM ---
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const name = document.getElementById('contactName')?.value.trim();
-            const email = document.getElementById('contactEmail')?.value.trim();
-            const phone = document.getElementById('contactPhone')?.value.trim() || null;
-            const subject = document.getElementById('contactSubject')?.value;
-            const message = document.getElementById('contactMessage')?.value.trim();
-
-            if (!name) {
-                showToast('Please enter your name.', 'error');
-                document.getElementById('contactName')?.focus();
-                return;
-            }
-            if (!email) {
-                showToast('Please enter your email address.', 'error');
-                document.getElementById('contactEmail')?.focus();
-                return;
-            }
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showToast('Please enter a valid email address.', 'error');
-                document.getElementById('contactEmail')?.focus();
-                return;
-            }
-            if (!subject || subject === '') {
-                showToast('Please select a subject.', 'error');
-                document.getElementById('contactSubject')?.focus();
-                return;
-            }
-            if (!message) {
-                showToast('Please enter your message.', 'error');
-                document.getElementById('contactMessage')?.focus();
-                return;
-            }
-
-            const formData = { name, email, phone, subject, message };
-
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-            const result = await submitContactForm(formData);
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
-
-            if (result.success) {
-                showToast('✅ Your message has been sent! We\'ll get back to you within 24 hours.', 'success');
-                this.reset();
-            } else {
-                showToast('❌ Failed to send your message. Please try again or contact us directly at info@theraptor.com', 'error');
-            }
-        });
-    }
 }
 
-// ============================================
-//  TOAST NOTIFICATIONS
-// ============================================
+// ============================================================
+// TOAST NOTIFICATION
+// ============================================================
 function showToast(message, type = 'success') {
-    let container = document.querySelector('.toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.cssText = 'z-index: 9999; max-width: 350px;';
-        document.body.appendChild(container);
+    const toast = document.getElementById('toastMessage');
+    if (!toast) {
+        // Fallback alert-style
+        const div = document.createElement('div');
+        div.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:12px;padding:12px 20px;box-shadow:0 8px 24px rgba(0,0,0,0.15);border-left:4px solid ' + (type === 'error' ? '#dc3545' : '#1e8449') + ';max-width:350px;';
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+        return;
     }
-
-    const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0 show`;
-    toast.role = 'alert';
-    toast.ariaLive = 'assertive';
-    toast.ariaAtomic = 'true';
-    toast.style.cssText = 'display: block; margin-bottom: 0.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease;';
-
-    toast.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">
-                ${message}
-            </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => {
-            if (toast.parentNode) toast.remove();
-        }, 300);
-    }, 4000);
-
-    toast.querySelector('.btn-close')?.addEventListener('click', function() {
-        toast.remove();
-    });
+    toast.textContent = message;
+    toast.className = 'toast';
+    if (type === 'error') toast.classList.add('error');
+    toast.style.display = 'block';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 4000);
 }
 
-// Add slide-in animation
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateX(50px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-`;
-document.head.appendChild(style);
+// ============================================================
+// INITIALIZE EVERYTHING
+// ============================================================
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load articles
+    await fetchArticles();
 
-// ============================================
-//  INITIALIZATION
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
+    // Homepage: latest & trending
+    renderLatest('latestArticlesContainer');
+    renderTrending('trendingContainer');
+    updateBreakingNews();
+
+    // Blog page: featured, all articles, trending
+    if (document.getElementById('featuredContainer')) {
+        renderFeatured('featuredContainer');
+    }
+    if (document.getElementById('blogArticlesContainer')) {
+        renderBlogArticles('blogArticlesContainer', 'all');
+    }
+    if (document.getElementById('trendingContainerBlog')) {
+        renderTrending('trendingContainerBlog');
+    }
+
+    // Category filters (blog)
+    setupCategoryFilters();
+
+    // Dark mode
     initDarkMode();
+
+    // Mobile menu
     initMobileMenu();
-    initSearch();
-    initCategoryFilters();   // This now handles URL params automatically
-    initForms();
 
-    // Update current year in footer if element exists
-    const yearSpan = document.querySelector('.current-year');
-    if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
-    }
+    // Search
+    initSearchEvents();
 
-    console.log('✅ The Raptor initialized successfully!');
+    // Newsletter
+    initNewsletter();
+
+    // Contact form
+    initContactForm();
+
+    console.log('✅ The Raptor site initialized.');
 });
