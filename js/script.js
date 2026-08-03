@@ -9,22 +9,19 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let allArticles = [];
 
 // ============================================================
-// FETCH ARTICLES (with fallback)
+// FETCH ARTICLES (from Supabase only - no mock data)
 // ============================================================
 async function fetchArticles() {
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('articles')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) throw error;
-        if (data && data.length > 0) {
-            allArticles = data;
-        } else {
-            allArticles = getMockArticles();
-        }
+        allArticles = data || [];
     } catch (e) {
-        allArticles = getMockArticles();
+        console.error('Failed to fetch articles:', e);
+        allArticles = [];
     }
 }
 
@@ -71,13 +68,11 @@ function renderSingleArticle(containerId = 'blogArticlesContainer') {
     const image = article.image || 'https://picsum.photos/seed/default/800/400';
     let content = article.content || article.excerpt || '';
 
-    // --- Format content: convert newlines to paragraphs ---
-    // If there are double newlines, split into paragraphs
+    // Format content: convert newlines to paragraphs
     if (content.includes('\n\n')) {
         const paragraphs = content.split('\n\n').filter(p => p.trim() !== '');
         content = paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
     } else {
-        // Otherwise, replace single newlines with <br>
         content = content.replace(/\n/g, '<br>');
     }
 
@@ -106,6 +101,7 @@ function renderSingleArticle(containerId = 'blogArticlesContainer') {
         </div>
     `;
 }
+
 function renderLatest(containerId = 'latestArticlesContainer', limit = 6) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -534,7 +530,7 @@ function initSearchEvents() {
 // ============================================================
 async function subscribeNewsletter(email, frequency) {
     try {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('newsletter_subscribers')
             .insert([{ email, frequency }]);
         if (error) {
@@ -626,7 +622,7 @@ function initContactForm() {
         submitBtn.disabled = true;
 
         try {
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('contact_messages')
                 .insert([{ name, email, phone, subject, message, newsletter_optin: newsletter }]);
             if (error) throw error;
@@ -695,7 +691,6 @@ function initBlog() {
     const articleId = urlParams.get('id');
     if (articleId) {
         renderSingleArticle('blogArticlesContainer');
-        // Hide category filter and pagination when viewing single article
         const filterSection = document.getElementById('categoryFilter');
         const paginationSection = document.querySelector('#articleGrid nav');
         if (filterSection) filterSection.style.display = 'none';
@@ -712,17 +707,9 @@ function initBlog() {
     renderTrending('trendingContainerBlog', 4);
 }
 
-function initAbout() {
-    // Static page
-}
-
-function initContact() {
-    // Static page
-}
-
-function initComingSoon() {
-    // Static page
-}
+function initAbout() {}
+function initContact() {}
+function initComingSoon() {}
 
 // ============================================================
 // GLOBAL INIT
