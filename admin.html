@@ -510,6 +510,19 @@
         window.supabaseClient = supabaseClient;
 
         // ============================================================
+        //  CHECK AUTHENTICATION (after client is ready)
+        // ============================================================
+        async function checkAuth() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) {
+                // Redirect to login page
+                window.location.href = 'login.html';
+            }
+        }
+        // Run auth check now
+        checkAuth();
+
+        // ============================================================
         //  DARK MODE TOGGLE
         // ============================================================
         (function initDarkMode() {
