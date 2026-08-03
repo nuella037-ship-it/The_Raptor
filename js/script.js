@@ -9,39 +9,203 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allArticles = [];
 
 // ============================================================
-// FETCH ARTICLES
+// MOCK DATA (fallback when Supabase fails or returns empty)
+// ============================================================
+function getMockArticles() {
+    return [
+        {
+            id: 1,
+            title: "AI Breakthrough in Medical Imaging Detects Early-Stage Cancers",
+            category: "Technology",
+            excerpt: "Researchers at Stanford have developed a new deep-learning model that analyses MRI and CT scans with 98.7% accuracy…",
+            content: "Full content here...",
+            author: "Dr. Elena Moore",
+            date: "May 17, 2026",
+            image: "https://picsum.photos/seed/tech/600/300",
+            tags: ["AI", "Healthcare"],
+            featured: true,
+            trending: true,
+            readTime: "5 min read",
+            comments: 142,
+            breaking: true
+        },
+        {
+            id: 2,
+            title: "Global Markets Rally as Tech Giants Post Record Earnings",
+            category: "Business",
+            excerpt: "The S&P 500 and NASDAQ surged over 3% after Apple, Microsoft, and Nvidia reported quarterly results…",
+            content: "Full content here...",
+            author: "James Carter",
+            date: "May 16, 2026",
+            image: "https://picsum.photos/seed/business/600/300",
+            tags: ["Finance", "Stocks"],
+            featured: false,
+            trending: true,
+            readTime: "4 min read",
+            comments: 89,
+            breaking: false
+        },
+        {
+            id: 3,
+            title: "Champions League Final: Underdogs Stun Favourites in Extra Time",
+            category: "Sports",
+            excerpt: "In one of the most dramatic finals in recent memory, Borussia Dortmund defeated Real Madrid 3–2…",
+            content: "Full content here...",
+            author: "Maria Santos",
+            date: "May 15, 2026",
+            image: "https://picsum.photos/seed/sports/600/300",
+            tags: ["Football", "UEFA"],
+            featured: false,
+            trending: true,
+            readTime: "6 min read",
+            comments: 210,
+            breaking: false
+        },
+        {
+            id: 4,
+            title: "Street Art Festival Transforms Downtown with 50+ Murals",
+            category: "Culture",
+            excerpt: "Over 150 international artists descended on the city for the annual Mural Fest…",
+            content: "Full content here...",
+            author: "Liam O'Brien",
+            date: "May 14, 2026",
+            image: "https://picsum.photos/seed/culture/600/300",
+            tags: ["Art", "Community"],
+            featured: false,
+            trending: false,
+            readTime: "3 min read",
+            comments: 45,
+            breaking: false
+        },
+        {
+            id: 5,
+            title: "Scientists Successfully Grow Mini-Brains with Functional Neural Networks",
+            category: "Science",
+            excerpt: "In a groundbreaking study published in Nature, a team from MIT has cultivated cerebral organoids…",
+            content: "Full content here...",
+            author: "Dr. Aisha Khan",
+            date: "May 13, 2026",
+            image: "https://picsum.photos/seed/science/600/300",
+            tags: ["Neuroscience", "Research"],
+            featured: false,
+            trending: false,
+            readTime: "7 min read",
+            comments: 76,
+            breaking: false
+        },
+        {
+            id: 6,
+            title: "New Health Guidelines Recommend Plant‑Based Diets for Longevity",
+            category: "Health",
+            excerpt: "The World Health Organization has updated its dietary recommendations, emphasising plant‑based proteins and whole grains…",
+            content: "Full content here...",
+            author: "Dr. Sarah Lee",
+            date: "May 12, 2026",
+            image: "https://picsum.photos/seed/health/600/300",
+            tags: ["Nutrition", "Wellness"],
+            featured: false,
+            trending: false,
+            readTime: "4 min read",
+            comments: 33,
+            breaking: false
+        },
+        {
+            id: 7,
+            title: "Top 10 Hidden Travel Gems for 2026",
+            category: "Travel",
+            excerpt: "From the fjords of Norway to the temples of Myanmar, here are the places you need to visit this year…",
+            content: "Full content here...",
+            author: "Maya Patel",
+            date: "May 11, 2026",
+            image: "https://picsum.photos/seed/travel/600/300",
+            tags: ["Adventure", "Culture"],
+            featured: false,
+            trending: false,
+            readTime: "5 min read",
+            comments: 58,
+            breaking: false
+        }
+    ];
+}
+
+// ============================================================
+// FETCH ARTICLES (with fallback)
 // ============================================================
 async function fetchArticles() {
-    console.log('🔵 fetchArticles() called');
     try {
         const { data, error } = await supabase
             .from('articles')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) throw error;
-        allArticles = data || [];
-        console.log(`🔵 Fetched ${allArticles.length} articles`);
+        if (data && data.length > 0) {
+            allArticles = data;
+        } else {
+            allArticles = getMockArticles();
+        }
     } catch (e) {
-        console.warn('⚠️ Supabase fetch failed:', e);
-        allArticles = [];
+        allArticles = getMockArticles();
     }
 }
 
 // ============================================================
-// RENDER FUNCTIONS (unchanged – keep your existing ones)
+// RENDER FUNCTIONS
 // ============================================================
 function renderArticleCard(article, colClass = 'col-md-6 col-lg-4') {
     const image = article.image || 'https://picsum.photos/seed/default/600/300';
+    const excerpt = article.excerpt || (article.content ? article.content.substring(0, 120) + '…' : '');
     return `
         <div class="${colClass}">
             <div class="article-card">
                 <img src="${image}" alt="${article.title}" loading="lazy" />
                 <div class="card-body">
-                    <span class="badge bg-primary mb-2">${article.category}</span>
+                    <span class="badge bg-primary mb-2">${article.category || 'Uncategorized'}</span>
                     <h5 class="card-title">${article.title}</h5>
-                    <p class="card-text">${article.excerpt || article.content?.substring(0, 120) || ''}…</p>
-                    <div class="card-meta">${article.author} • ${article.date}</div>
+                    <p class="card-text">${excerpt}</p>
+                    <div class="card-meta">${article.author || 'Unknown'} • ${article.date || 'Recent'}</div>
+                    <a href="blog.html?id=${article.id}" class="btn btn-sm btn-outline-primary mt-2">Read more →</a>
                 </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderSingleArticle(containerId = 'blogArticlesContainer') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const articleId = parseInt(urlParams.get('id'));
+
+    if (!articleId) {
+        // No ID in URL, show regular blog list
+        renderBlogArticles(containerId, 'all', 1);
+        return;
+    }
+
+    const article = allArticles.find(a => a.id === articleId);
+    if (!article) {
+        container.innerHTML = `<div class="col-12 text-center py-5"><h3>Article not found.</h3><a href="blog.html" class="btn btn-primary mt-3">Back to all articles</a></div>`;
+        return;
+    }
+
+    const image = article.image || 'https://picsum.photos/seed/default/800/400';
+    const content = article.content || article.excerpt || '';
+
+    container.innerHTML = `
+        <div class="col-12">
+            <a href="blog.html" class="btn btn-outline-primary mb-4"><i class="fas fa-arrow-left"></i> Back to all articles</a>
+            <div class="article-single">
+                <img src="${image}" alt="${article.title}" class="img-fluid rounded-3 mb-4" style="max-height:400px;width:100%;object-fit:cover;" />
+                <span class="badge bg-primary mb-2">${article.category || 'Uncategorized'}</span>
+                <h1 class="fw-bold">${article.title}</h1>
+                <div class="text-muted small mb-3">
+                    By <strong>${article.author || 'Unknown'}</strong> • ${article.date || 'Recent'} 
+                    ${article.readTime ? `• ${article.readTime}` : ''}
+                    ${article.comments ? `• <i class="fas fa-comment"></i> ${article.comments} comments` : ''}
+                </div>
+                <div class="article-content" style="font-size:1.1rem;line-height:1.8;">${content}</div>
+                ${article.tags && article.tags.length > 0 ? `<div class="mt-4"><strong>Tags:</strong> ${article.tags.map(tag => `<span class="badge bg-secondary me-1">${tag}</span>`).join('')}</div>` : ''}
             </div>
         </div>
     `;
@@ -72,11 +236,33 @@ function renderTrending(containerId = 'trendingContainer', limit = 4) {
 let currentPage = 1;
 const pageSize = 6;
 
-function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'all', page = 1) {
+function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'all', page = 1, searchQuery = '') {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    let articles = category === 'all' ? allArticles : allArticles.filter(a => a.category?.toLowerCase() === category.toLowerCase());
+    // Check if we're viewing a single article
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('id')) {
+        renderSingleArticle(containerId);
+        return;
+    }
+
+    let articles = allArticles;
+    if (category !== 'all') {
+        articles = articles.filter(a => (a.category || '').toLowerCase() === category.toLowerCase());
+    }
+    if (searchQuery.trim() !== '') {
+        const q = searchQuery.trim().toLowerCase();
+        articles = articles.filter(a =>
+            (a.title || '').toLowerCase().includes(q) ||
+            (a.excerpt || '').toLowerCase().includes(q) ||
+            (a.content || '').toLowerCase().includes(q) ||
+            (a.category || '').toLowerCase().includes(q) ||
+            (a.author || '').toLowerCase().includes(q) ||
+            (a.tags && a.tags.some(tag => (tag || '').toLowerCase().includes(q)))
+        );
+    }
+
     const totalArticles = articles.length;
     const totalPages = Math.ceil(totalArticles / pageSize) || 1;
     if (page < 1) page = 1;
@@ -87,20 +273,24 @@ function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'a
     const pageArticles = articles.slice(start, end);
 
     if (pageArticles.length === 0) {
-        container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles in this category.</div>`;
+        container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles match your criteria.</div>`;
     } else {
         container.innerHTML = pageArticles.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
     }
 
     const resultCount = document.getElementById('resultCount');
     if (resultCount) {
-        resultCount.textContent = `Showing ${start + 1}–${Math.min(end, totalArticles)} of ${totalArticles} articles`;
+        if (searchQuery.trim() !== '') {
+            resultCount.textContent = `Showing ${start + 1}–${Math.min(end, totalArticles)} of ${totalArticles} results for "${searchQuery}"`;
+        } else {
+            resultCount.textContent = `Showing ${start + 1}–${Math.min(end, totalArticles)} of ${totalArticles} articles`;
+        }
     }
 
-    renderPagination(totalPages, page, category);
+    renderPagination(totalPages, page, category, searchQuery);
 }
 
-function renderPagination(totalPages, currentPage, category) {
+function renderPagination(totalPages, currentPage, category, searchQuery) {
     const container = document.getElementById('paginationContainer');
     if (!container) return;
     if (totalPages <= 1) {
@@ -108,11 +298,11 @@ function renderPagination(totalPages, currentPage, category) {
         return;
     }
     let html = '';
-    html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}" data-category="${category}">Previous</a></li>`;
+    html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}" data-category="${category}" data-search="${searchQuery}">Previous</a></li>`;
     for (let i = 1; i <= totalPages; i++) {
-        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}" data-category="${category}">${i}</a></li>`;
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}" data-category="${category}" data-search="${searchQuery}">${i}</a></li>`;
     }
-    html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}" data-category="${category}">Next</a></li>`;
+    html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}" data-category="${category}" data-search="${searchQuery}">Next</a></li>`;
     container.innerHTML = html;
 
     container.querySelectorAll('.page-link').forEach(link => {
@@ -120,9 +310,11 @@ function renderPagination(totalPages, currentPage, category) {
             e.preventDefault();
             const page = parseInt(this.dataset.page);
             const cat = this.dataset.category || 'all';
+            const search = this.dataset.search || '';
             if (!isNaN(page) && page >= 1 && page <= totalPages) {
-                renderBlogArticles('blogArticlesContainer', cat, page);
-                window.scrollTo({ top: document.getElementById('articleGrid').offsetTop - 20, behavior: 'smooth' });
+                renderBlogArticles('blogArticlesContainer', cat, page, search);
+                const grid = document.getElementById('articleGrid');
+                if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
@@ -145,7 +337,7 @@ function renderFeatured(containerId = 'featuredContainer') {
             <h2 class="fw-bold">${featured.title}</h2>
             <p>${featured.excerpt || featured.content?.substring(0, 200) || ''}…</p>
             <div class="text-muted small">${featured.author} • ${featured.date}</div>
-            <a href="blog.html" class="btn btn-primary mt-2">Read more</a>
+            <a href="blog.html?id=${featured.id}" class="btn btn-primary mt-2">Read more →</a>
         </div>
     `;
 }
@@ -171,7 +363,7 @@ function renderHeroFeatured(containerId = 'heroRow') {
             </div>
             <p>${featured.excerpt || featured.content?.substring(0, 160) || ''}…</p>
             <div class="d-flex gap-2">
-                <a href="blog.html" class="btn btn-primary">Read full story →</a>
+                <a href="blog.html?id=${featured.id}" class="btn btn-primary">Read full story →</a>
                 <a href="#" class="btn btn-outline-secondary" aria-label="Share"><i class="fas fa-share-alt"></i> Share</a>
                 <a href="#" class="btn btn-outline-secondary" aria-label="Save"><i class="fas fa-bookmark"></i> Save</a>
             </div>
@@ -230,6 +422,7 @@ function renderFilterButtons() {
     }
     const urlParams = new URLSearchParams(window.location.search);
     const currentCategory = urlParams.get('category') || 'all';
+    const searchQuery = urlParams.get('search') || '';
     let html = `<button class="btn btn-sm btn-${currentCategory === 'all' ? 'primary' : 'outline-primary'} filter-btn" data-category="all" aria-pressed="${currentCategory === 'all' ? 'true' : 'false'}">All</button>`;
     categories.forEach(cat => {
         const isActive = cat.toLowerCase() === currentCategory.toLowerCase();
@@ -280,10 +473,17 @@ function handleFilterClick(e) {
     btn.classList.remove('btn-outline-primary');
     btn.classList.add('btn-primary');
     btn.setAttribute('aria-pressed', 'true');
+
     const url = new URL(window.location);
-    url.searchParams.set('category', category);
+    if (category === 'all') {
+        url.searchParams.delete('category');
+    } else {
+        url.searchParams.set('category', category);
+    }
+    url.searchParams.delete('id');
     window.history.pushState({}, '', url);
-    renderBlogArticles('blogArticlesContainer', category, 1);
+    const searchQuery = url.searchParams.get('search') || '';
+    renderBlogArticles('blogArticlesContainer', category, 1, searchQuery);
     renderFilterButtons();
 }
 
@@ -302,6 +502,7 @@ function updateArticleCount() {
     const el = document.getElementById('articleCount');
     if (el) el.textContent = allArticles.length;
 }
+
 function updateLastUpdated() {
     const el = document.getElementById('lastUpdated');
     if (!el) return;
@@ -310,104 +511,60 @@ function updateLastUpdated() {
         return;
     }
     const latest = allArticles[0];
-    const date = latest.date || new Date(latest.created_at).toLocaleDateString();
+    const date = latest.date || (latest.created_at ? new Date(latest.created_at).toLocaleDateString() : 'Recent');
     el.textContent = date;
 }
 
 // ============================================================
-// SEARCH
+// GLOBAL SEARCH
 // ============================================================
-function performSearch(query) {
+function redirectSearch(query) {
+    const q = query.trim();
+    if (q.length === 0) {
+        const container = document.getElementById('searchResultsContainer');
+        if (container) container.style.display = 'none';
+        return;
+    }
+    window.location.href = `blog.html?search=${encodeURIComponent(q)}`;
+}
+
+function previewSearch(query) {
+    const q = query.trim();
     const container = document.getElementById('searchResultsContainer');
     if (!container) return;
-    const q = query.trim().toLowerCase();
     if (q.length === 0) {
         container.style.display = 'none';
         return;
     }
     const results = allArticles.filter(article =>
-        article.title?.toLowerCase().includes(q) ||
-        article.excerpt?.toLowerCase().includes(q) ||
-        article.content?.toLowerCase().includes(q) ||
-        article.category?.toLowerCase().includes(q) ||
-        article.author?.toLowerCase().includes(q) ||
-        (article.tags && article.tags.some(tag => tag.toLowerCase().includes(q)))
+        (article.title || '').toLowerCase().includes(q) ||
+        (article.excerpt || '').toLowerCase().includes(q) ||
+        (article.content || '').toLowerCase().includes(q) ||
+        (article.category || '').toLowerCase().includes(q) ||
+        (article.author || '').toLowerCase().includes(q) ||
+        (article.tags && article.tags.some(tag => (tag || '').toLowerCase().includes(q)))
     );
     if (results.length === 0) {
-        container.innerHTML = '<div class="p-2 text-muted">No articles found.</div>';
+        container.innerHTML = '<div class="p-2 text-muted">No articles found. <a href="blog.html?search=' + encodeURIComponent(q) + '">Search all articles</a></div>';
         container.style.display = 'block';
         return;
     }
     let html = '';
-    results.slice(0, 8).forEach(article => {
+    results.slice(0, 5).forEach(article => {
         html += `
             <div class="result-item">
-                <div class="result-title"><a href="blog.html" class="text-decoration-none">${article.title}</a></div>
+                <div class="result-title"><a href="blog.html?id=${article.id}" class="text-decoration-none">${article.title}</a></div>
                 <div class="result-meta">${article.category} • ${article.author} • ${article.date}</div>
             </div>
         `;
     });
+    if (results.length > 5) {
+        html += `<div class="result-item"><a href="blog.html?search=${encodeURIComponent(q)}" class="text-primary">View all ${results.length} results →</a></div>`;
+    } else {
+        html += `<div class="result-item"><a href="blog.html?search=${encodeURIComponent(q)}" class="text-primary">See all results →</a></div>`;
+    }
     container.innerHTML = html;
     container.style.display = 'block';
-}
-
-// ============================================================
-// DARK MODE – WITH LOGGING
-// ============================================================
-function initDarkMode() {
-    console.log('🔵 initDarkMode() called');
-    const toggle = document.getElementById('darkModeToggle');
-    console.log('🔵 toggle element:', toggle);
-    if (!toggle) {
-        console.warn('⚠️ Dark mode toggle not found!');
-        return;
-    }
-    // Restore saved state
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-        const icon = toggle.querySelector('i');
-        if (icon) icon.className = 'fas fa-sun';
-        console.log('🔵 Dark mode restored from localStorage');
-    }
-    // Add click listener
-    toggle.addEventListener('click', function() {
-        console.log('🔵 Dark mode toggle clicked');
-        document.body.classList.toggle('dark-mode');
-        const icon = this.querySelector('i');
-        if (!icon) return;
-        const isDark = document.body.classList.contains('dark-mode');
-        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-        localStorage.setItem('darkMode', isDark);
-        console.log('🔵 Dark mode now:', isDark ? 'ON' : 'OFF');
-    });
-}
-
-// ============================================================
-// MOBILE MENU – WITH LOGGING
-// ============================================================
-function initMobileMenu() {
-    console.log('🔵 initMobileMenu() called');
-    const toggle = document.getElementById('mobileMenuToggle');
-    const nav = document.getElementById('mobileNav');
-    console.log('🔵 toggle:', toggle, 'nav:', nav);
-    if (!toggle || !nav) {
-        console.warn('⚠️ Mobile menu elements not found!');
-        return;
-    }
-    toggle.addEventListener('click', function() {
-        console.log('🔵 Mobile toggle clicked');
-        const isOpen = nav.style.display === 'block';
-        nav.style.display = isOpen ? 'none' : 'block';
-        this.setAttribute('aria-expanded', !isOpen);
-        console.log('🔵 Mobile menu now:', isOpen ? 'closed' : 'open');
-    });
-    // Auto-close on window resize (desktop)
-    window.addEventListener('resize', function() {
-        if (window.innerWidth >= 768) {
-            nav.style.display = 'none';
-            toggle.setAttribute('aria-expanded', 'false');
-        }
-    });
 }
 
 // ============================================================
@@ -416,28 +573,63 @@ function initMobileMenu() {
 function initSearchEvents() {
     const navInput = document.getElementById('navSearchInput');
     const navBtn = document.getElementById('navSearchBtn');
-    const mobileInput = document.getElementById('mobileSearchInput');
-    const mobileBtn = document.getElementById('mobileSearchBtn');
     const container = document.getElementById('searchResultsContainer');
-    if (!container) return;
 
-    function handleSearch(input) {
-        if (input) performSearch(input.value);
+    function handleSearchSubmit(input) {
+        if (input) {
+            const query = input.value.trim();
+            if (query.length > 0) {
+                redirectSearch(query);
+            } else {
+                if (container) {
+                    container.innerHTML = '<div class="p-2 text-muted">Please enter a search term.</div>';
+                    container.style.display = 'block';
+                    setTimeout(() => { container.style.display = 'none'; }, 2000);
+                }
+            }
+        }
+    }
+
+    function handleSearchInput(input) {
+        if (input) {
+            const query = input.value.trim();
+            if (query.length === 0) {
+                if (container) container.style.display = 'none';
+                return;
+            }
+            previewSearch(query);
+        }
     }
 
     if (navInput) {
-        navInput.addEventListener('input', function() { handleSearch(this); });
-        navInput.addEventListener('blur', function() { setTimeout(() => { container.style.display = 'none'; }, 300); });
-        navInput.addEventListener('focus', function() { if (this.value.length > 0) handleSearch(this); });
-        if (navBtn) navBtn.addEventListener('click', function(e) { e.preventDefault(); handleSearch(navInput); });
+        navInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSearchSubmit(this);
+            }
+        });
+        navInput.addEventListener('input', function() {
+            handleSearchInput(this);
+        });
+        navInput.addEventListener('blur', function() {
+            setTimeout(() => { if (container) container.style.display = 'none'; }, 300);
+        });
+        navInput.addEventListener('focus', function() {
+            if (this.value.trim().length > 0) {
+                previewSearch(this.value.trim());
+            }
+        });
+        if (navBtn) {
+            navBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleSearchSubmit(navInput);
+            });
+        }
     }
-    if (mobileInput) {
-        mobileInput.addEventListener('input', function() { handleSearch(this); });
-        if (mobileBtn) mobileBtn.addEventListener('click', function(e) { e.preventDefault(); handleSearch(mobileInput); });
-    }
+
     document.addEventListener('click', function(e) {
-        if (!e.target.closest('#searchResultsContainer') && !e.target.closest('.search-nav-item') && !e.target.closest('.search-mobile')) {
-            container.style.display = 'none';
+        if (!e.target.closest('#searchResultsContainer') && !e.target.closest('.search-nav-item')) {
+            if (container) container.style.display = 'none';
         }
     });
 }
@@ -496,7 +688,8 @@ function initNewsletter() {
         submitBtn.disabled = false;
 
         if (result.success) {
-            document.getElementById('newsletterSuccess').classList.remove('d-none');
+            const successEl = document.getElementById('newsletterSuccess');
+            if (successEl) successEl.classList.remove('d-none');
             form.reset();
             showToast('You\'re on the list!', 'success');
         } else {
@@ -542,11 +735,22 @@ function initContactForm() {
                 .from('contact_messages')
                 .insert([{ name, email, phone, subject, message, newsletter_optin: newsletter }]);
             if (error) throw error;
-            document.getElementById('contactSuccess').classList.remove('d-none');
+            const successEl = document.getElementById('contactSuccess');
+            if (successEl) successEl.classList.remove('d-none');
             form.reset();
             showToast('Message sent! We\'ll get back to you soon.', 'success');
         } catch (e) {
-            showToast('Failed to send. Please try again later.', 'error');
+            try {
+                let msgs = JSON.parse(localStorage.getItem('contact_messages') || '[]');
+                msgs.push({ name, email, phone, subject, message, newsletter_optin: newsletter, created_at: new Date().toISOString() });
+                localStorage.setItem('contact_messages', JSON.stringify(msgs));
+                const successEl = document.getElementById('contactSuccess');
+                if (successEl) successEl.classList.remove('d-none');
+                form.reset();
+                showToast('Message sent (offline)! We\'ll get back to you soon.', 'success');
+            } catch (err) {
+                showToast('Failed to send. Please try again later.', 'error');
+            }
         } finally {
             text.classList.remove('d-none');
             spinner.classList.add('d-none');
@@ -577,51 +781,74 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================================
-// SINGLE INIT
+// PAGE INITIALISATION FUNCTIONS
+// ============================================================
+function initHome() {
+    renderHeroFeatured('heroRow');
+    renderLatest('latestArticlesContainer');
+    renderTrending('trendingContainer');
+    updateBreakingNews();
+    renderCategoryCards('categoriesContainer');
+}
+
+function initBlog() {
+    renderFeatured('featuredContainer');
+    renderFilterButtons();
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category') || 'all';
+    const searchQuery = urlParams.get('search') || '';
+    const articleId = urlParams.get('id');
+    if (articleId) {
+        renderSingleArticle('blogArticlesContainer');
+        // Hide category filter and pagination when viewing single article
+        const filterSection = document.getElementById('categoryFilter');
+        const paginationSection = document.querySelector('#articleGrid nav');
+        if (filterSection) filterSection.style.display = 'none';
+        if (paginationSection) paginationSection.style.display = 'none';
+    } else {
+        renderBlogArticles('blogArticlesContainer', category, 1, searchQuery);
+        const filterSection = document.getElementById('categoryFilter');
+        const paginationSection = document.querySelector('#articleGrid nav');
+        if (filterSection) filterSection.style.display = 'block';
+        if (paginationSection) paginationSection.style.display = 'block';
+    }
+    updateArticleCount();
+    updateLastUpdated();
+    renderTrending('trendingContainerBlog', 4);
+}
+
+function initAbout() {
+    // Static page
+}
+
+function initContact() {
+    // Static page
+}
+
+function initComingSoon() {
+    // Static page
+}
+
+// ============================================================
+// GLOBAL INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('🔵 DOMContentLoaded fired');
     await fetchArticles();
-    console.log('🔵 Articles loaded:', allArticles.length);
 
-    // ---- HOMEPAGE ----
     const isHome = document.getElementById('heroRow') !== null;
     const isBlog = document.getElementById('blogArticlesContainer') !== null;
+    const isAbout = document.getElementById('aboutHero') !== null;
+    const isContact = document.getElementById('contactHero') !== null;
+    const isComingSoon = document.querySelector('.coming-soon-wrapper') !== null;
 
-    if (isHome) {
-        console.log('🔵 Homepage detected');
-        renderHeroFeatured('heroRow');
-        renderLatest('latestArticlesContainer');
-        renderTrending('trendingContainer');
-        updateBreakingNews();
-        renderCategoryCards('categoriesContainer');
-    }
+    if (isHome) initHome();
+    else if (isBlog) initBlog();
+    else if (isAbout) initAbout();
+    else if (isContact) initContact();
+    else if (isComingSoon) initComingSoon();
 
-    if (isBlog) {
-        console.log('🔵 Blog page detected');
-        renderFeatured('featuredContainer');
-        renderFilterButtons();
-        const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category') || 'all';
-        renderBlogArticles('blogArticlesContainer', category, 1);
-        updateArticleCount();
-        updateLastUpdated();
-        renderTrending('trendingContainerBlog', 4);
-    }
-
-    // ---- ALWAYS RUN THESE ----
-    console.log('🔵 Initializing dark mode...');
-    initDarkMode();
-    console.log('🔵 Initializing mobile menu...');
-    initMobileMenu();
-    console.log('🔵 Initializing search...');
     initSearchEvents();
-    console.log('🔵 Initializing newsletter...');
     initNewsletter();
-    console.log('🔵 Initializing contact form...');
     initContactForm();
-    console.log('🔵 Rendering footer categories...');
     renderFooterCategories();
-
-    console.log('✅ The Raptor site initialized.');
 });
