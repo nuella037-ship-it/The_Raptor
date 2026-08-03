@@ -9,7 +9,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 let allArticles = [];
 
 // ============================================================
-// FETCH ARTICLES (from Supabase only - no mock data)
+// FETCH ARTICLES
 // ============================================================
 async function fetchArticles() {
     try {
