@@ -499,6 +499,19 @@
          MAIN ADMIN SCRIPT
          ============================================================ -->
     <script>
+
+                // Check if user is logged in
+async function checkAuth() {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+        // Redirect to login page
+        window.location.href = 'login.html';
+    }
+}
+checkAuth();
+
+
+        
         // ============================================================
         //  SUPABASE CONFIG
         // ============================================================
