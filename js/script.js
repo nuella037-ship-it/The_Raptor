@@ -5,106 +5,31 @@ const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ============================================================
-// MOCK DATA (fallback if Supabase fails)
-// ============================================================
-const mockArticles = [
-    {
-        id: 1,
-        title: "AI Breakthrough in Medical Imaging Detects Early-Stage Cancers",
-        category: "Technology",
-        excerpt: "Researchers at Stanford have developed a new deep-learning model that analyses MRI and CT scans with 98.7% accuracy…",
-        content: "Full content here...",
-        author: "Dr. Elena Moore",
-        date: "May 17, 2026",
-        image: "https://picsum.photos/seed/tech/600/300",
-        tags: ["AI", "Healthcare"],
-        featured: true,
-        trending: true
-    },
-    {
-        id: 2,
-        title: "Global Markets Rally as Tech Giants Post Record Earnings",
-        category: "Business",
-        excerpt: "The S&P 500 and NASDAQ surged over 3% after Apple, Microsoft, and Nvidia reported quarterly results…",
-        content: "Full content here...",
-        author: "James Carter",
-        date: "May 16, 2026",
-        image: "https://picsum.photos/seed/business/600/300",
-        tags: ["Finance", "Stocks"],
-        featured: false,
-        trending: true
-    },
-    {
-        id: 3,
-        title: "Champions League Final: Underdogs Stun Favourites in Extra Time",
-        category: "Sports",
-        excerpt: "In one of the most dramatic finals in recent memory, Borussia Dortmund defeated Real Madrid 3–2…",
-        content: "Full content here...",
-        author: "Maria Santos",
-        date: "May 15, 2026",
-        image: "https://picsum.photos/seed/sports/600/300",
-        tags: ["Football", "UEFA"],
-        featured: false,
-        trending: true
-    },
-    {
-        id: 4,
-        title: "Street Art Festival Transforms Downtown with 50+ Murals",
-        category: "Culture",
-        excerpt: "Over 150 international artists descended on the city for the annual Mural Fest…",
-        content: "Full content here...",
-        author: "Liam O'Brien",
-        date: "May 14, 2026",
-        image: "https://picsum.photos/seed/culture/600/300",
-        tags: ["Art", "Community"],
-        featured: false,
-        trending: false
-    },
-    {
-        id: 5,
-        title: "Scientists Successfully Grow Mini-Brains with Functional Neural Networks",
-        category: "Science",
-        excerpt: "In a groundbreaking study published in Nature, a team from MIT has cultivated cerebral organoids…",
-        content: "Full content here...",
-        author: "Dr. Aisha Khan",
-        date: "May 13, 2026",
-        image: "https://picsum.photos/seed/science/600/300",
-        tags: ["Neuroscience", "Research"],
-        featured: false,
-        trending: false
-    }
-];
-
-// Global articles array (will be populated from Supabase or mock)
+// Global articles array
 let allArticles = [];
 
 // ============================================================
 // FETCH ARTICLES
 // ============================================================
 async function fetchArticles() {
+    console.log('🔵 fetchArticles() called');
     try {
         const { data, error } = await supabase
             .from('articles')
             .select('*')
             .order('created_at', { ascending: false });
         if (error) throw error;
-        if (data && data.length > 0) {
-            allArticles = data;
-            return;
-        }
+        allArticles = data || [];
+        console.log(`🔵 Fetched ${allArticles.length} articles`);
     } catch (e) {
-        console.warn('Supabase fetch failed, using mock data', e);
+        console.warn('⚠️ Supabase fetch failed:', e);
+        allArticles = [];
     }
-    // Fallback to mock
-    allArticles = mockArticles;
 }
 
 // ============================================================
-// RENDER FUNCTIONS
+// RENDER FUNCTIONS (unchanged – keep your existing ones)
 // ============================================================
-
-// Render a single article card (Bootstrap column)
 function renderArticleCard(article, colClass = 'col-md-6 col-lg-4') {
     const image = article.image || 'https://picsum.photos/seed/default/600/300';
     return `
@@ -122,7 +47,6 @@ function renderArticleCard(article, colClass = 'col-md-6 col-lg-4') {
     `;
 }
 
-// Render latest stories on homepage
 function renderLatest(containerId = 'latestArticlesContainer', limit = 6) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -134,7 +58,6 @@ function renderLatest(containerId = 'latestArticlesContainer', limit = 6) {
     container.innerHTML = latest.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
 }
 
-// Render trending on homepage or blog
 function renderTrending(containerId = 'trendingContainer', limit = 4) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -146,29 +69,65 @@ function renderTrending(containerId = 'trendingContainer', limit = 4) {
     container.innerHTML = trending.map(a => renderArticleCard(a, 'col-md-6 col-lg-3')).join('');
 }
 
-// Render blog articles with category filter
-let currentCategory = 'all';
-let filteredArticles = [];
+let currentPage = 1;
+const pageSize = 6;
 
-function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'all') {
+function renderBlogArticles(containerId = 'blogArticlesContainer', category = 'all', page = 1) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    currentCategory = category;
-    if (category === 'all') {
-        filteredArticles = allArticles;
-    } else {
-        filteredArticles = allArticles.filter(a => a.category.toLowerCase() === category.toLowerCase());
-    }
-    if (filteredArticles.length === 0) {
+
+    let articles = category === 'all' ? allArticles : allArticles.filter(a => a.category?.toLowerCase() === category.toLowerCase());
+    const totalArticles = articles.length;
+    const totalPages = Math.ceil(totalArticles / pageSize) || 1;
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+    currentPage = page;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const pageArticles = articles.slice(start, end);
+
+    if (pageArticles.length === 0) {
         container.innerHTML = `<div class="col-12 text-center text-muted py-5">No articles in this category.</div>`;
-        document.getElementById('resultCount').textContent = `Showing 0 articles`;
-        return;
+    } else {
+        container.innerHTML = pageArticles.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
     }
-    container.innerHTML = filteredArticles.map(a => renderArticleCard(a, 'col-md-6 col-lg-4')).join('');
-    document.getElementById('resultCount').textContent = `Showing ${filteredArticles.length} articles`;
+
+    const resultCount = document.getElementById('resultCount');
+    if (resultCount) {
+        resultCount.textContent = `Showing ${start + 1}–${Math.min(end, totalArticles)} of ${totalArticles} articles`;
+    }
+
+    renderPagination(totalPages, page, category);
 }
 
-// Render featured story on blog page
+function renderPagination(totalPages, currentPage, category) {
+    const container = document.getElementById('paginationContainer');
+    if (!container) return;
+    if (totalPages <= 1) {
+        container.innerHTML = '';
+        return;
+    }
+    let html = '';
+    html += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}" data-category="${category}">Previous</a></li>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}" data-category="${category}">${i}</a></li>`;
+    }
+    html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}" data-category="${category}">Next</a></li>`;
+    container.innerHTML = html;
+
+    container.querySelectorAll('.page-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(this.dataset.page);
+            const cat = this.dataset.category || 'all';
+            if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                renderBlogArticles('blogArticlesContainer', cat, page);
+                window.scrollTo({ top: document.getElementById('articleGrid').offsetTop - 20, behavior: 'smooth' });
+            }
+        });
+    });
+}
+
 function renderFeatured(containerId = 'featuredContainer') {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -191,9 +150,143 @@ function renderFeatured(containerId = 'featuredContainer') {
     `;
 }
 
-// ============================================================
-// BREAKING NEWS TICKER
-// ============================================================
+function renderHeroFeatured(containerId = 'heroRow') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const featured = allArticles.find(a => a.featured === true) || allArticles[0];
+    if (!featured) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No featured article.</div>`;
+        return;
+    }
+    container.innerHTML = `
+        <div class="col-md-6">
+            <img src="${featured.image || 'https://picsum.photos/seed/hero/800/500'}" alt="${featured.title}" class="img-fluid rounded-3" />
+        </div>
+        <div class="col-md-6">
+            <span class="badge bg-primary me-2">Exclusive</span>
+            <span class="badge bg-secondary">${featured.date || 'Recent'}</span>
+            <h2 class="hero-title mt-2">${featured.title}</h2>
+            <div class="article-meta text-muted small mb-3">
+                By <strong>${featured.author}</strong> • ${featured.readTime || '4 min read'} • <i class="fas fa-comment"></i> ${featured.comments || 0} comments
+            </div>
+            <p>${featured.excerpt || featured.content?.substring(0, 160) || ''}…</p>
+            <div class="d-flex gap-2">
+                <a href="blog.html" class="btn btn-primary">Read full story →</a>
+                <a href="#" class="btn btn-outline-secondary" aria-label="Share"><i class="fas fa-share-alt"></i> Share</a>
+                <a href="#" class="btn btn-outline-secondary" aria-label="Save"><i class="fas fa-bookmark"></i> Save</a>
+            </div>
+        </div>
+    `;
+}
+
+function renderCategoryCards(containerId = 'categoriesContainer') {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const categoryMap = {};
+    allArticles.forEach(article => {
+        const cat = article.category || 'Uncategorized';
+        categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+    });
+    const categories = Object.keys(categoryMap);
+    if (categories.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center text-muted">No categories found.</div>`;
+        return;
+    }
+    const iconMap = {
+        'world': 'fa-globe-americas',
+        'technology': 'fa-microchip',
+        'business': 'fa-chart-pie',
+        'sports': 'fa-football-ball',
+        'culture': 'fa-paint-brush',
+        'science': 'fa-flask',
+        'health': 'fa-heartbeat',
+        'travel': 'fa-plane'
+    };
+    let html = '';
+    categories.forEach(cat => {
+        const key = cat.toLowerCase();
+        const icon = iconMap[key] || 'fa-tag';
+        const count = categoryMap[cat];
+        html += `
+            <div class="col-6 col-md-3">
+                <a href="blog.html?category=${encodeURIComponent(cat)}" class="category-card d-block text-center p-3 border rounded-3 text-decoration-none">
+                    <i class="fas ${icon} text-primary fa-2x"></i>
+                    <h5 class="mt-2">${cat}</h5>
+                    <span class="text-muted small category-count">${count} articles</span>
+                </a>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function renderFilterButtons() {
+    const container = document.getElementById('filterButtons');
+    if (!container) return;
+    const categories = [...new Set(allArticles.map(a => a.category).filter(Boolean))];
+    if (categories.length === 0) {
+        container.innerHTML = `<span class="text-muted">No categories available.</span>`;
+        return;
+    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentCategory = urlParams.get('category') || 'all';
+    let html = `<button class="btn btn-sm btn-${currentCategory === 'all' ? 'primary' : 'outline-primary'} filter-btn" data-category="all" aria-pressed="${currentCategory === 'all' ? 'true' : 'false'}">All</button>`;
+    categories.forEach(cat => {
+        const isActive = cat.toLowerCase() === currentCategory.toLowerCase();
+        html += `<button class="btn btn-sm btn-${isActive ? 'primary' : 'outline-primary'} filter-btn" data-category="${cat}" aria-pressed="${isActive ? 'true' : 'false'}">${cat}</button>`;
+    });
+    container.innerHTML = html;
+    setupCategoryFilters();
+}
+
+function renderFooterCategories() {
+    const container = document.getElementById('footerCategoryList');
+    if (!container) return;
+    const categoryMap = {};
+    allArticles.forEach(article => {
+        const cat = article.category || 'Uncategorized';
+        categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+    });
+    const categories = Object.keys(categoryMap);
+    if (categories.length === 0) {
+        container.innerHTML = `<li class="text-muted small">No categories</li>`;
+        return;
+    }
+    let html = '';
+    categories.forEach(cat => {
+        const count = categoryMap[cat];
+        html += `<li><a href="blog.html?category=${encodeURIComponent(cat)}" class="text-muted text-decoration-none">${cat}</a> (${count})</li>`;
+    });
+    container.innerHTML = html;
+}
+
+function setupCategoryFilters() {
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(btn => {
+        btn.removeEventListener('click', handleFilterClick);
+        btn.addEventListener('click', handleFilterClick);
+    });
+}
+
+function handleFilterClick(e) {
+    const btn = e.currentTarget;
+    const category = btn.dataset.category;
+    const buttons = document.querySelectorAll('.filter-btn');
+    buttons.forEach(b => {
+        b.classList.remove('btn-primary');
+        b.classList.add('btn-outline-primary');
+        b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.remove('btn-outline-primary');
+    btn.classList.add('btn-primary');
+    btn.setAttribute('aria-pressed', 'true');
+    const url = new URL(window.location);
+    url.searchParams.set('category', category);
+    window.history.pushState({}, '', url);
+    renderBlogArticles('blogArticlesContainer', category, 1);
+    renderFilterButtons();
+}
+
 function updateBreakingNews() {
     const el = document.getElementById('breakingText');
     if (!el) return;
@@ -201,9 +294,24 @@ function updateBreakingNews() {
         el.textContent = 'No breaking news at the moment.';
         return;
     }
-    // Use the latest article as breaking, or pick one with a 'breaking' flag
     const breaking = allArticles.find(a => a.breaking) || allArticles[0];
     el.textContent = breaking.title;
+}
+
+function updateArticleCount() {
+    const el = document.getElementById('articleCount');
+    if (el) el.textContent = allArticles.length;
+}
+function updateLastUpdated() {
+    const el = document.getElementById('lastUpdated');
+    if (!el) return;
+    if (allArticles.length === 0) {
+        el.textContent = 'never';
+        return;
+    }
+    const latest = allArticles[0];
+    const date = latest.date || new Date(latest.created_at).toLocaleDateString();
+    el.textContent = date;
 }
 
 // ============================================================
@@ -218,7 +326,7 @@ function performSearch(query) {
         return;
     }
     const results = allArticles.filter(article =>
-        article.title.toLowerCase().includes(q) ||
+        article.title?.toLowerCase().includes(q) ||
         article.excerpt?.toLowerCase().includes(q) ||
         article.content?.toLowerCase().includes(q) ||
         article.category?.toLowerCase().includes(q) ||
@@ -244,36 +352,56 @@ function performSearch(query) {
 }
 
 // ============================================================
-// DARK MODE
+// DARK MODE – WITH LOGGING
 // ============================================================
 function initDarkMode() {
+    console.log('🔵 initDarkMode() called');
     const toggle = document.getElementById('darkModeToggle');
-    if (!toggle) return;
+    console.log('🔵 toggle element:', toggle);
+    if (!toggle) {
+        console.warn('⚠️ Dark mode toggle not found!');
+        return;
+    }
+    // Restore saved state
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
-        toggle.querySelector('i').className = 'fas fa-sun';
+        const icon = toggle.querySelector('i');
+        if (icon) icon.className = 'fas fa-sun';
+        console.log('🔵 Dark mode restored from localStorage');
     }
+    // Add click listener
     toggle.addEventListener('click', function() {
+        console.log('🔵 Dark mode toggle clicked');
         document.body.classList.toggle('dark-mode');
         const icon = this.querySelector('i');
+        if (!icon) return;
         const isDark = document.body.classList.contains('dark-mode');
         icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
         localStorage.setItem('darkMode', isDark);
+        console.log('🔵 Dark mode now:', isDark ? 'ON' : 'OFF');
     });
 }
 
 // ============================================================
-// MOBILE MENU
+// MOBILE MENU – WITH LOGGING
 // ============================================================
 function initMobileMenu() {
+    console.log('🔵 initMobileMenu() called');
     const toggle = document.getElementById('mobileMenuToggle');
     const nav = document.getElementById('mobileNav');
-    if (!toggle || !nav) return;
+    console.log('🔵 toggle:', toggle, 'nav:', nav);
+    if (!toggle || !nav) {
+        console.warn('⚠️ Mobile menu elements not found!');
+        return;
+    }
     toggle.addEventListener('click', function() {
+        console.log('🔵 Mobile toggle clicked');
         const isOpen = nav.style.display === 'block';
         nav.style.display = isOpen ? 'none' : 'block';
         this.setAttribute('aria-expanded', !isOpen);
+        console.log('🔵 Mobile menu now:', isOpen ? 'closed' : 'open');
     });
+    // Auto-close on window resize (desktop)
     window.addEventListener('resize', function() {
         if (window.innerWidth >= 768) {
             nav.style.display = 'none';
@@ -291,7 +419,6 @@ function initSearchEvents() {
     const mobileInput = document.getElementById('mobileSearchInput');
     const mobileBtn = document.getElementById('mobileSearchBtn');
     const container = document.getElementById('searchResultsContainer');
-
     if (!container) return;
 
     function handleSearch(input) {
@@ -308,7 +435,6 @@ function initSearchEvents() {
         mobileInput.addEventListener('input', function() { handleSearch(this); });
         if (mobileBtn) mobileBtn.addEventListener('click', function(e) { e.preventDefault(); handleSearch(mobileInput); });
     }
-    // Close on outside click
     document.addEventListener('click', function(e) {
         if (!e.target.closest('#searchResultsContainer') && !e.target.closest('.search-nav-item') && !e.target.closest('.search-mobile')) {
             container.style.display = 'none';
@@ -330,7 +456,6 @@ async function subscribeNewsletter(email, frequency) {
         }
         return { success: true };
     } catch (e) {
-        // Fallback: store in localStorage
         let subs = JSON.parse(localStorage.getItem('newsletter_subs') || '[]');
         if (subs.find(s => s.email === email)) {
             return { success: false, message: 'You are already subscribed!' };
@@ -431,34 +556,11 @@ function initContactForm() {
 }
 
 // ============================================================
-// BLOG CATEGORY FILTERS
-// ============================================================
-function setupCategoryFilters() {
-    const buttons = document.querySelectorAll('.filter-btn');
-    if (!buttons.length) return;
-    buttons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.dataset.category;
-            buttons.forEach(b => {
-                b.classList.remove('btn-primary');
-                b.classList.add('btn-outline-primary');
-                b.setAttribute('aria-pressed', 'false');
-            });
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary');
-            this.setAttribute('aria-pressed', 'true');
-            renderBlogArticles('blogArticlesContainer', category);
-        });
-    });
-}
-
-// ============================================================
 // TOAST NOTIFICATION
 // ============================================================
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toastMessage');
     if (!toast) {
-        // Fallback alert-style
         const div = document.createElement('div');
         div.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#fff;border-radius:12px;padding:12px 20px;box-shadow:0 8px 24px rgba(0,0,0,0.15);border-left:4px solid ' + (type === 'error' ? '#dc3545' : '#1e8449') + ';max-width:350px;';
         div.textContent = message;
@@ -475,45 +577,51 @@ function showToast(message, type = 'success') {
 }
 
 // ============================================================
-// INITIALIZE EVERYTHING
+// SINGLE INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', async function() {
-    // Load articles
+    console.log('🔵 DOMContentLoaded fired');
     await fetchArticles();
+    console.log('🔵 Articles loaded:', allArticles.length);
 
-    // Homepage: latest & trending
-    renderLatest('latestArticlesContainer');
-    renderTrending('trendingContainer');
-    updateBreakingNews();
+    // ---- HOMEPAGE ----
+    const isHome = document.getElementById('heroRow') !== null;
+    const isBlog = document.getElementById('blogArticlesContainer') !== null;
 
-    // Blog page: featured, all articles, trending
-    if (document.getElementById('featuredContainer')) {
+    if (isHome) {
+        console.log('🔵 Homepage detected');
+        renderHeroFeatured('heroRow');
+        renderLatest('latestArticlesContainer');
+        renderTrending('trendingContainer');
+        updateBreakingNews();
+        renderCategoryCards('categoriesContainer');
+    }
+
+    if (isBlog) {
+        console.log('🔵 Blog page detected');
         renderFeatured('featuredContainer');
-    }
-    if (document.getElementById('blogArticlesContainer')) {
-        renderBlogArticles('blogArticlesContainer', 'all');
-    }
-    if (document.getElementById('trendingContainerBlog')) {
-        renderTrending('trendingContainerBlog');
+        renderFilterButtons();
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category') || 'all';
+        renderBlogArticles('blogArticlesContainer', category, 1);
+        updateArticleCount();
+        updateLastUpdated();
+        renderTrending('trendingContainerBlog', 4);
     }
 
-    // Category filters (blog)
-    setupCategoryFilters();
-
-    // Dark mode
+    // ---- ALWAYS RUN THESE ----
+    console.log('🔵 Initializing dark mode...');
     initDarkMode();
-
-    // Mobile menu
+    console.log('🔵 Initializing mobile menu...');
     initMobileMenu();
-
-    // Search
+    console.log('🔵 Initializing search...');
     initSearchEvents();
-
-    // Newsletter
+    console.log('🔵 Initializing newsletter...');
     initNewsletter();
-
-    // Contact form
+    console.log('🔵 Initializing contact form...');
     initContactForm();
+    console.log('🔵 Rendering footer categories...');
+    renderFooterCategories();
 
     console.log('✅ The Raptor site initialized.');
 });
