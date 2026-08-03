@@ -15,25 +15,13 @@
     --transition: 0.3s ease;
 }
 
-body.dark-mode {
-    --bg-light: #1a1a2e;
-    --text-dark: #e9ecef;
-    --text-muted: #adb5bd;
-    --border-color: #2d2d44;
-    --shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-
 body {
     font-family: 'Inter', sans-serif;
     background: #fff;
     color: var(--text-dark);
-    transition: background var(--transition), color var(--transition);
-}
-body.dark-mode {
-    background: #12121e;
-    color: #e9ecef;
 }
 
+/* Utility colours */
 .text-green { color: var(--green) !important; }
 .text-primary { color: var(--primary) !important; }
 .bg-primary { background-color: var(--primary) !important; }
@@ -47,10 +35,6 @@ body.dark-mode {
 .site-header {
     background: #fff;
     border-bottom: 1px solid var(--border-color);
-    transition: background var(--transition), border-color var(--transition);
-}
-body.dark-mode .site-header {
-    background: #1a1a2e;
 }
 
 .site-logo {
@@ -62,7 +46,7 @@ body.dark-mode .site-header {
 .site-logo:hover { color: var(--text-dark); }
 .site-logo .text-green { color: var(--green); }
 
-/* Navigation */
+/* Navigation – always visible, wraps on small screens */
 .main-nav {
     display: flex;
     align-items: center;
@@ -80,11 +64,8 @@ body.dark-mode .site-header {
 .main-nav .nav-link.active {
     color: var(--primary);
 }
-body.dark-mode .main-nav .nav-link:hover,
-body.dark-mode .main-nav .nav-link.active {
-    color: var(--primary-light);
-}
 
+/* Search input in nav */
 .search-nav-item {
     display: flex;
     gap: 0.3rem;
@@ -92,27 +73,6 @@ body.dark-mode .main-nav .nav-link.active {
 }
 .search-nav-item .form-control {
     width: 160px;
-}
-
-/* Mobile Nav */
-.mobile-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem 0;
-}
-.mobile-nav .nav-link {
-    color: var(--text-muted);
-    text-decoration: none;
-    font-weight: 500;
-}
-.mobile-nav .nav-link:hover,
-.mobile-nav .nav-link.active {
-    color: var(--primary);
-}
-body.dark-mode .mobile-nav .nav-link:hover,
-body.dark-mode .mobile-nav .nav-link.active {
-    color: var(--primary-light);
 }
 
 /* Search Results Dropdown */
@@ -130,9 +90,6 @@ body.dark-mode .mobile-nav .nav-link.active {
     z-index: 1000;
     padding: 0.5rem 0;
 }
-body.dark-mode .search-results-dropdown {
-    background: #1a1a2e;
-}
 .result-item {
     padding: 0.5rem 1rem;
     border-bottom: 1px solid var(--border-color);
@@ -142,7 +99,6 @@ body.dark-mode .search-results-dropdown {
     color: var(--text-dark);
     font-weight: 500;
 }
-body.dark-mode .result-title a { color: #e9ecef; }
 .result-meta {
     font-size: 0.8rem;
     color: var(--text-muted);
@@ -165,9 +121,6 @@ body.dark-mode .result-title a { color: #e9ecef; }
     align-items: center;
     gap: 0.5rem;
 }
-body.dark-mode .breaking-news {
-    background: rgba(220,53,69,0.2);
-}
 
 .hero-title {
     font-size: 2.2rem;
@@ -188,9 +141,6 @@ body.dark-mode .breaking-news {
     box-shadow: var(--shadow);
     transition: transform var(--transition), box-shadow var(--transition);
     height: 100%;
-}
-body.dark-mode .article-card {
-    background: #1e1e32;
 }
 .article-card:hover {
     transform: translateY(-4px);
@@ -222,16 +172,9 @@ body.dark-mode .article-card {
     transition: background var(--transition), transform var(--transition);
     background: #fff;
 }
-body.dark-mode .category-card {
-    background: #1e1e32;
-    border-color: var(--border-color) !important;
-}
 .category-card:hover {
     background: var(--bg-light);
     transform: translateY(-2px);
-}
-body.dark-mode .category-card:hover {
-    background: #2a2a44;
 }
 @media (max-width: 576px) {
     .category-card i { font-size: 1.5rem !important; }
@@ -251,11 +194,11 @@ body.dark-mode .category-card:hover {
 }
 #newsletterSection .alert-success {
     background: rgba(30, 132, 73, 0.2);
-    color: #d4edda;
+    color: #155724;
     border-color: #1e8449;
 }
 
-/* Footer */
+/* Footer Base */
 .site-footer {
     background: #1a1a2e;
     color: #e9ecef;
@@ -271,46 +214,34 @@ body.dark-mode .category-card:hover {
     border-color: #2d2d44;
 }
 
-/* Dark mode overrides for Bootstrap components */
-body.dark-mode .bg-light {
-    background-color: #1a1a2e !important;
+/* ===== FOOTER COLOR UPDATES ===== */
+#mainFooter {
+    color: #ffffff; /* all text white */
 }
-body.dark-mode .text-muted {
-    color: #adb5bd !important;
+#mainFooter h5 {
+    color: var(--green) !important; /* headers green */
 }
-body.dark-mode .border {
-    border-color: var(--border-color) !important;
+#mainFooter a {
+    color: #ffffff !important; /* all links white */
 }
-body.dark-mode .card {
-    background: #1e1e32;
-    border-color: var(--border-color);
+#mainFooter a:hover {
+    color: var(--green-light) !important; /* hover green */
 }
-body.dark-mode .form-control,
-body.dark-mode .form-select {
-    background: #2d2d44;
-    color: #e9ecef;
-    border-color: #3d3d5a;
+#mainFooter .text-muted {
+    color: #ffffff !important; /* override bootstrap text-muted */
 }
-body.dark-mode .form-control:focus,
-body.dark-mode .form-select:focus {
-    background: #2d2d44;
-    color: #e9ecef;
-    border-color: var(--primary-light);
+#mainFooter .site-logo {
+    color: #ffffff !important; /* logo text white (green part stays) */
 }
-body.dark-mode .btn-outline-secondary {
-    color: #adb5bd;
-    border-color: #3d3d5a;
+#mainFooter .site-logo .text-green {
+    color: var(--green) !important; /* keep green part */
 }
-body.dark-mode .btn-outline-secondary:hover {
-    background: #3d3d5a;
-    color: #fff;
-}
-body.dark-mode .badge.bg-light {
-    background: #2d2d44 !important;
-    color: #e9ecef !important;
-}
-body.dark-mode .badge.bg-primary {
-    background: var(--primary-light) !important;
+/* Ensure list items and paragraphs are white */
+#mainFooter p,
+#mainFooter li,
+#mainFooter span,
+#mainFooter div {
+    color: #ffffff;
 }
 
 /* Utilities */
@@ -327,4 +258,37 @@ body.dark-mode .badge.bg-primary {
 .img-fluid {
     max-width: 100%;
     height: auto;
+}
+
+/* ===== FULL RESPONSIVENESS (navbar wraps naturally) ===== */
+@media (max-width: 768px) {
+    .main-nav {
+        gap: 0.8rem;
+    }
+    .main-nav .nav-link {
+        font-size: 0.95rem;
+    }
+    .search-nav-item .form-control {
+        width: 120px;
+    }
+    .site-logo {
+        font-size: 1.8rem;
+    }
+}
+@media (max-width: 576px) {
+    .main-nav {
+        gap: 0.5rem;
+    }
+    .main-nav .nav-link {
+        font-size: 0.85rem;
+    }
+    .search-nav-item .form-control {
+        width: 100px;
+    }
+    .article-card img {
+        height: 160px;
+    }
+    .hero-title {
+        font-size: 1.8rem;
+    }
 }
