@@ -145,11 +145,15 @@
 
     <script>
         // ============================================================
-        //  SUPABASE CONFIG
+        //  SUPABASE CONFIG (session not persisted)
         // ============================================================
         const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: false   // session only in memory; closing tab requires re-login
+            }
+        });
 
         // ============================================================
         //  DOM REFS
