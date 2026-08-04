@@ -94,6 +94,45 @@
         </div>
     </section>
 
+    <!-- ===== COMMENTS SECTION (only shown on single article view) ===== -->
+    <section id="commentsSection" class="py-4" style="display:none;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h3 class="fw-bold">Comments (<span id="commentCount">0</span>)</h3>
+                    <div id="commentsList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+
+                    <!-- Comment Form -->
+                    <form id="commentForm" class="mt-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" id="commentAuthor" class="form-control" placeholder="Your name *" required />
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" id="commentEmail" class="form-control" placeholder="Your email (optional)" />
+                            </div>
+                            <div class="col-12">
+                                <textarea id="commentContent" class="form-control" rows="3" placeholder="Write your comment..." required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary" id="commentSubmitBtn">
+                                    <span id="commentSubmitText"><i class="fas fa-paper-plane"></i> Post Comment</span>
+                                    <span id="commentSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                                <span id="commentStatus" class="text-muted ms-2"></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="commentSuccess" class="alert alert-success mt-3 d-none" role="alert">
+                        <i class="fas fa-check-circle"></i> Your comment has been submitted and will appear after approval.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ===== TRENDING ===== -->
     <section id="trendingSection" class="py-5 bg-light">
         <div class="container">
@@ -188,5 +227,16 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/script.js"></script>
+
+    <!-- Inline script to show comments on single article view -->
+    <script>
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            if (articleId) {
+                document.getElementById('commentsSection').style.display = 'block';
+            }
+        })();
+    </script>
 </body>
 </html>
