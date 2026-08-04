@@ -687,16 +687,22 @@
         }
     }
 
-    window.deleteArticle = async function(id) {
-        if (!confirm('Delete this article permanently?')) return;
-        try {
-            const { error } = await supabaseClient.from('articles').delete().eq('id', id);
-            if (error) throw error;
-            showToast('Article deleted.', 'success');
-            loadAllAdminData();
-        } catch (err) {
-            showToast('Failed to delete: ' + err.message, 'error');
-        }
+    window.deleteArticle = function(id) {
+        showConfirmModal(
+            'Delete Article',
+            'Are you sure you want to permanently delete this article? This cannot be undone.',
+            async function() {
+                try {
+                    const { error } = await supabaseClient.from('articles').delete().eq('id', id);
+                    if (error) throw error;
+                    showToast('Article deleted.', 'success');
+                    loadAllAdminData();
+                } catch (err) {
+                    showToast('Failed to delete: ' + err.message, 'error');
+                }
+            },
+            'danger'
+        );
     };
 
     window.editArticle = async function(id) {
@@ -893,35 +899,43 @@
             showToast('Failed: ' + err.message, 'error');
         }
     };
-
-    window.deleteMessage = async function(id) {
-        if (!confirm('Delete this message?')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('contact_messages')
-                .delete()
-                .eq('id', id);
-            if (error) throw error;
-            loadAllAdminData();
-            showToast('Message deleted.', 'success');
-        } catch (err) {
-            showToast('Failed to delete: ' + err.message, 'error');
-        }
+    window.deleteMessage = function(id) {
+        showConfirmModal(
+            'Delete Message',
+            'Are you sure you want to permanently delete this message? This cannot be undone.',
+            async function() {
+                try {
+                    const { error } = await supabaseClient
+                        .from('contact_messages')
+                        .delete()
+                        .eq('id', id);
+                    if (error) throw error;
+                    loadAllAdminData();
+                    showToast('Message deleted.', 'success');
+                } catch (err) {
+                    showToast('Failed to delete: ' + err.message, 'error');
+                }
+            },
+            'danger'
+        );
     };
-
-    window.deleteAllMessages = async function() {
-        if (!confirm('Delete ALL messages? This cannot be undone.')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('contact_messages')
-                .delete()
-                .neq('id', 0);
-            if (error) throw error;
-            loadAllAdminData();
-            showToast('All messages deleted.', 'success');
-        } catch (err) {
-            showToast('Failed: ' + err.message, 'error');
-        }
+ 
+    window.deleteAllMessages = function() {
+        showConfirmModal(
+            'Delete All Messages',
+            'Are you sure you want to permanently delete ALL messages? This cannot be undone.',
+            async function() {
+                try {
+                    const { error } = await supabaseClient.from('contact_messages').delete().neq('id', 0);
+                    if (error) throw error;
+                    loadAllAdminData();
+                    showToast('All messages deleted.', 'success');
+                } catch (err) {
+                    showToast('Failed: ' + err.message, 'error');
+                }
+            },
+            'danger'
+        );
     };
 
     // ============================================================
@@ -971,34 +985,46 @@
         }
     }
 
-    window.deleteSubscriber = async function(id) {
-        if (!confirm('Remove this subscriber?')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('newsletter_subscribers')
-                .delete()
-                .eq('id', id);
-            if (error) throw error;
-            loadAllAdminData();
-            showToast('Subscriber removed.', 'success');
-        } catch (err) {
-            showToast('Failed: ' + err.message, 'error');
-        }
+    window.deleteSubscriber = function(id) {
+        showConfirmModal(
+            'Remove Subscriber',
+            'Are you sure you want to remove this subscriber? They will no longer receive newsletters.',
+            async function() {
+                try {
+                    const { error } = await supabaseClient
+                        .from('newsletter_subscribers')
+                        .delete()
+                        .eq('id', id);
+                    if (error) throw error;
+                    loadAllAdminData();
+                    showToast('Subscriber removed.', 'success');
+                } catch (err) {
+                    showToast('Failed: ' + err.message, 'error');
+                }
+            },
+            'danger'
+        );
     };
 
-    window.deleteAllSubscribers = async function() {
-        if (!confirm('Delete ALL subscribers? This cannot be undone.')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('newsletter_subscribers')
-                .delete()
-                .neq('id', 0);
-            if (error) throw error;
-            loadAllAdminData();
-            showToast('All subscribers deleted.', 'success');
-        } catch (err) {
-            showToast('Failed: ' + err.message, 'error');
-        }
+    window.deleteAllSubscribers = function() {
+        showConfirmModal(
+            'Delete All Subscribers',
+            'Are you sure you want to permanently delete ALL subscribers? This cannot be undone.',
+            async function() {
+                try {
+                    const { error } = await supabaseClient
+                        .from('newsletter_subscribers')
+                        .delete()
+                        .neq('id', 0);
+                    if (error) throw error;
+                    loadAllAdminData();
+                    showToast('All subscribers deleted.', 'success');
+                } catch (err) {
+                    showToast('Failed: ' + err.message, 'error');
+                }
+            },
+            'danger'
+        );
     };
 
     window.exportSubscribers = async function() {
@@ -1095,53 +1121,73 @@
         }
     }
 
-    window.approveComment = async function(id) {
-        if (!confirm('Approve this comment?')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('comments')
-                .update({ is_approved: true })
-                .eq('id', id);
-            if (error) throw error;
-            showToast('Comment approved.', 'success');
-            loadAdminComments();
-            updateStats();
-        } catch (err) {
-            showToast('Failed to approve: ' + err.message, 'error');
-        }
-    };
+        // Approve a comment
+        window.approveComment = function(id) {
+            showConfirmModal(
+                'Approve Comment',
+                'Are you sure you want to approve this comment? It will become visible on the website.',
+                async function() {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('comments')
+                            .update({ is_approved: true })
+                            .eq('id', id);
+                        if (error) throw error;
+                        showToast('Comment approved.', 'success');
+                        loadAdminComments();
+                        updateStats();
+                    } catch (err) {
+                        showToast('Failed to approve: ' + err.message, 'error');
+                    }
+                },
+                'success'
+            );
+        };
 
-    window.deleteComment = async function(id) {
-        if (!confirm('Delete this comment permanently?')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('comments')
-                .delete()
-                .eq('id', id);
-            if (error) throw error;
-            showToast('Comment deleted.', 'success');
-            loadAdminComments();
-            updateStats();
-        } catch (err) {
-            showToast('Failed to delete: ' + err.message, 'error');
-        }
-    };
-
-    window.deleteAllComments = async function() {
-        if (!confirm('Delete ALL comments? This cannot be undone.')) return;
-        try {
-            const { error } = await supabaseClient
-                .from('comments')
-                .delete()
-                .neq('id', 0);
-            if (error) throw error;
-            showToast('All comments deleted.', 'success');
-            loadAdminComments();
-            updateStats();
-        } catch (err) {
-            showToast('Failed: ' + err.message, 'error');
-        }
-    };
+        // Delete a comment (from admin)
+        window.deleteComment = function(id) {
+            showConfirmModal(
+                'Delete Comment',
+                'Are you sure you want to permanently delete this comment? This cannot be undone.',
+                async function() {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('comments')
+                            .delete()
+                            .eq('id', id);
+                        if (error) throw error;
+                        showToast('Comment deleted.', 'success');
+                        loadAdminComments();
+                        updateStats();
+                    } catch (err) {
+                        showToast('Failed to delete: ' + err.message, 'error');
+                    }
+                },
+                'danger'
+            );
+        };
+        // Delete all comments (from admin)
+        window.deleteAllComments = function() {
+            showConfirmModal(
+                'Delete All Comments',
+                'Are you sure you want to permanently delete ALL comments? This cannot be undone.',
+                async function() {
+                    try {
+                        const { error } = await supabaseClient
+                            .from('comments')
+                            .delete()
+                            .neq('id', 0);
+                        if (error) throw error;
+                        showToast('All comments deleted.', 'success');
+                        loadAdminComments();
+                        updateStats();
+                    } catch (err) {
+                        showToast('Failed: ' + err.message, 'error');
+                    }
+                },
+                'danger'
+            );
+        };
 
     // ============================================================
     //  STATS
@@ -1211,6 +1257,39 @@
         }, 4000);
     }
 
+        // ============================================================
+        //  CUSTOM CONFIRM MODAL
+        // ============================================================
+        let confirmCallback = null;
+        
+        function showConfirmModal(title, message, callback, type = 'primary') {
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            document.getElementById('confirmModalLabel').innerHTML = `<i class="fas fa-question-circle text-${type} me-2"></i> ${title}`;
+            document.getElementById('confirmModalBody').textContent = message;
+            
+            const okBtn = document.getElementById('confirmOkBtn');
+            okBtn.className = `btn btn-${type}`;
+            okBtn.textContent = type === 'danger' ? 'Delete' : 'Confirm';
+            
+            // Store callback
+            confirmCallback = callback;
+            
+            modal.show();
+        }
+        
+        // Handle OK button click
+        document.getElementById('confirmOkBtn').addEventListener('click', function() {
+            if (typeof confirmCallback === 'function') {
+                confirmCallback();
+                confirmCallback = null;
+            }
+            bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+        });
+        
+        // Reset callback when modal is hidden
+        document.getElementById('confirmModal').addEventListener('hidden.bs.modal', function() {
+            confirmCallback = null;
+        });
     // ============================================================
     //  INIT
     // ============================================================
