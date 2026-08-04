@@ -553,7 +553,7 @@
 
             if (!session) {
                 window.location.href = 'login.html';
-                return;
+                return null;
             }
 
             // Show user info
@@ -1228,10 +1228,18 @@
         // ============================================================
         //  INIT
         // ============================================================
-        document.addEventListener('DOMContentLoaded', function() {
-            loadAllAdminData();
+        document.addEventListener('DOMContentLoaded', async function() {
+            // First, check authentication and redirect if needed
+            const session = await checkAuth();
+            if (!session) {
+                // checkAuth already redirected
+                return;
+            }
 
-            // Auto-refresh messages tab when clicked
+            // If we have a session, load all data
+            await loadAllAdminData();
+
+            // Set up tab refresh listeners
             document.querySelector('[data-bs-target="#messages"]')?.addEventListener('click', function() {
                 loadAdminMessages();
                 updateStats();
@@ -1240,13 +1248,9 @@
                 loadAdminSubscribers();
                 updateStats();
             });
-
-            // Also refresh when clicking articles tab (in case of edit)
             document.querySelector('[data-bs-target="#articles"]')?.addEventListener('click', function() {
                 loadAdminArticles();
             });
-
-            // Auto-refresh comments tab when clicked
             document.querySelector('[data-bs-target="#comments"]')?.addEventListener('click', function() {
                 loadAdminComments();
                 updateStats();
