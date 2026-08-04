@@ -590,6 +590,189 @@ function initNewsletter() {
 }
 
 // ============================================================
+// COMMENTS - BLOG (Frontend)
+// ============================================================
+
+// Load approved comments for a given article
+async function loadComments(articleId) {
+    const container = document.getElementById('commentsList');
+    const countEl = document.getElementById('commentCount');
+    if (!container) return;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select('*')
+            .eq('article_id', articleId)
+            .eq('is_approved', true)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        const comments = data || [];
+        if (countEl) countEl.textContent = comments.length;
+
+        if (comments.length === 0) {
+            container.innerHTML = '<p class="text-muted">No comments yet. Be the first to share your thoughts!</p>';
+            return;
+        }
+
+        let html = '';
+        comments.forEach(c => {
+            html += `
+                <div class="comment-item border-bottom py-3">
+                    <div class="d-flex justify-content-between">
+                        <strong>${c.author || 'Anonymous'}</strong>
+                        <small class="text-muted">${new Date(c.created_at).toLocaleDateString()}</small>
+                    </div>
+                    <p class="mb-0">${c.content}</p>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Failed to load comments:', err);
+        container.innerHTML = '<p class="text-danger">Could not load comments.</p>';
+    }
+}
+
+// Submit a new comment
+async function submitComment(articleId, author, email, content) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .insert([{
+                article_id: articleId,
+                author: author,
+                email: email || null,
+                content: content,
+                is_approved: false
+            }])
+            .select();
+
+        if (error) throw error;
+        return { success: true, data };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+}
+
+// ============================================================
+// COMMENTS - ADMIN
+// ============================================================
+
+async function loadAdminComments() {
+    const container = document.getElementById('adminCommentList');
+    if (!container) return;
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select('*, articles(title)')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-comments"></i><p>No comments yet.</p></div>`;
+            return;
+        }
+
+        const total = data.length;
+        const pending = data.filter(c => !c.is_approved).length;
+        document.getElementById('commentStats').textContent = `${total} total · ${pending} pending`;
+
+        // Update pending badge
+        const badge = document.getElementById('pendingBadge');
+        if (pending > 0) {
+            badge.textContent = pending;
+            badge.style.display = 'inline';
+        } else {
+            badge.style.display = 'none';
+        }
+
+        let html = '';
+        data.forEach(c => {
+            const isPending = !c.is_approved;
+            html += `
+                <div class="list-group-item d-flex justify-content-between align-items-start ${isPending ? 'border-left-warning' : ''}" style="${isPending ? 'border-left-color: #ffc107;' : ''}">
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <strong>${c.author}</strong>
+                            <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">${isPending ? 'Pending' : 'Approved'}</span>
+                            <span class="badge bg-secondary">${c.articles?.title || 'Unknown article'}</span>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-envelope"></i> ${c.email || 'No email'} • ${new Date(c.created_at).toLocaleString()}
+                        </div>
+                        <div class="mt-1">${c.content}</div>
+                    </div>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        ${isPending ? `<button class="btn btn-sm btn-outline-success" onclick="approveComment('${c.id}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${c.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    } catch (err) {
+        console.error('Failed to load comments:', err);
+        container.innerHTML = '<div class="text-danger">Error loading comments.</div>';
+    }
+}
+
+// Approve a comment
+window.approveComment = async function(id) {
+    if (!confirm('Approve this comment?')) return;
+    try {
+        const { error } = await supabaseClient
+            .from('comments')
+            .update({ is_approved: true })
+            .eq('id', id);
+        if (error) throw error;
+        showToast('Comment approved.', 'success');
+        loadAdminComments();
+        updateStats();
+    } catch (err) {
+        showToast('Failed to approve: ' + err.message, 'error');
+    }
+};
+
+// Delete a comment (from admin)
+window.deleteComment = async function(id) {
+    if (!confirm('Delete this comment permanently?')) return;
+    try {
+        const { error } = await supabaseClient
+            .from('comments')
+            .delete()
+            .eq('id', id);
+        if (error) throw error;
+        showToast('Comment deleted.', 'success');
+        loadAdminComments();
+        updateStats();
+    } catch (err) {
+        showToast('Failed to delete: ' + err.message, 'error');
+    }
+};
+
+// Delete all comments
+window.deleteAllComments = async function() {
+    if (!confirm('Delete ALL comments? This cannot be undone.')) return;
+    try {
+        const { error } = await supabaseClient
+            .from('comments')
+            .delete()
+            .neq('id', 0);
+        if (error) throw error;
+        showToast('All comments deleted.', 'success');
+        loadAdminComments();
+        updateStats();
+    } catch (err) {
+        showToast('Failed: ' + err.message, 'error');
+    }
+};
+
+// ============================================================
 // CONTACT FORM
 // ============================================================
 function initContactForm() {
@@ -651,6 +834,57 @@ function initContactForm() {
 }
 
 // ============================================================
+// COMMENT FORM
+// ============================================================
+
+function setupCommentForm(articleId) {
+    const form = document.getElementById('commentForm');
+    if (!form) return;
+
+    // Remove any previous listener
+    const newForm = form.cloneNode(true);
+    form.parentNode.replaceChild(newForm, form);
+
+    newForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const author = document.getElementById('commentAuthor').value.trim();
+        const email = document.getElementById('commentEmail').value.trim();
+        const content = document.getElementById('commentContent').value.trim();
+
+        if (!author || !content) {
+            showToast('Please enter your name and comment.', 'error');
+            return;
+        }
+
+        const submitBtn = document.getElementById('commentSubmitBtn');
+        const text = document.getElementById('commentSubmitText');
+        const spinner = document.getElementById('commentSubmitSpinner');
+        const status = document.getElementById('commentStatus');
+
+        text.classList.add('d-none');
+        spinner.classList.remove('d-none');
+        submitBtn.disabled = true;
+        status.textContent = 'Submitting...';
+
+        const result = await submitComment(articleId, author, email, content);
+
+        text.classList.remove('d-none');
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+        status.textContent = '';
+
+        if (result.success) {
+            document.getElementById('commentSuccess').classList.remove('d-none');
+            newForm.reset();
+            showToast('Comment submitted for approval!', 'success');
+        } else {
+            showToast('Failed to post comment: ' + result.error, 'error');
+        }
+    });
+}
+
+// ============================================================
 // TOAST NOTIFICATION
 // ============================================================
 function showToast(message, type = 'success') {
@@ -689,18 +923,31 @@ function initBlog() {
     const category = urlParams.get('category') || 'all';
     const searchQuery = urlParams.get('search') || '';
     const articleId = urlParams.get('id');
+
     if (articleId) {
         renderSingleArticle('blogArticlesContainer');
+        // Hide category filter and pagination
         const filterSection = document.getElementById('categoryFilter');
         const paginationSection = document.querySelector('#articleGrid nav');
         if (filterSection) filterSection.style.display = 'none';
         if (paginationSection) paginationSection.style.display = 'none';
+
+        // Show comments section and load comments
+        const commentsSection = document.getElementById('commentsSection');
+        if (commentsSection) commentsSection.style.display = 'block';
+        loadComments(parseInt(articleId));
+
+        // Set up comment form submission
+        setupCommentForm(parseInt(articleId));
     } else {
         renderBlogArticles('blogArticlesContainer', category, 1, searchQuery);
         const filterSection = document.getElementById('categoryFilter');
         const paginationSection = document.querySelector('#articleGrid nav');
         if (filterSection) filterSection.style.display = 'block';
         if (paginationSection) paginationSection.style.display = 'block';
+        // Hide comments section when not on single article
+        const commentsSection = document.getElementById('commentsSection');
+        if (commentsSection) commentsSection.style.display = 'none';
     }
     updateArticleCount();
     updateLastUpdated();
