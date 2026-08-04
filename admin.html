@@ -605,6 +605,7 @@
                 loadAdminArticles(),
                 loadAdminMessages(),
                 loadAdminSubscribers(),
+                loadAdminComments(),
                 updateStats()
             ]);
         }
@@ -1124,6 +1125,12 @@
             // Also refresh when clicking articles tab (in case of edit)
             document.querySelector('[data-bs-target="#articles"]')?.addEventListener('click', function() {
                 loadAdminArticles();
+            });
+            
+            // Auto-refresh comments tab when clicked
+            document.querySelector('[data-bs-target="#comments"]')?.addEventListener('click', function() {
+                loadAdminComments();
+                updateStats();
             });
         });
     </script>
