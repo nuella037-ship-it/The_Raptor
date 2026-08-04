@@ -110,16 +110,13 @@
 <body>
 
     <div class="login-container">
-        <!-- Logo -->
         <div class="login-logo">
             <h1>The<span>Raptor</span></h1>
             <p>Admin Login</p>
         </div>
 
-        <!-- Error/Success Messages -->
         <div id="loginMessage" class="alert d-none" role="alert"></div>
 
-        <!-- Login Form -->
         <form id="loginForm" novalidate>
             <div class="mb-3">
                 <label for="loginEmail" class="form-label fw-semibold">Email Address</label>
@@ -145,13 +142,14 @@
 
     <script>
         // ============================================================
-        //  SUPABASE CONFIG (session not persisted)
+        //  SUPABASE CONFIG (session stored in sessionStorage)
         // ============================================================
         const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
             auth: {
-                persistSession: false   // session only in memory; closing tab requires re-login
+                persistSession: true,
+                storage: window.sessionStorage   // session cleared on tab close
             }
         });
 
@@ -215,7 +213,6 @@
                 return;
             }
 
-            // Show loading state
             btnText.classList.add('d-none');
             btnSpinner.classList.remove('d-none');
             loginBtn.disabled = true;
@@ -238,7 +235,6 @@
                 }
 
                 if (data.session) {
-                    // Success - redirect to admin
                     showMessage('Login successful! Redirecting...', 'success');
                     setTimeout(() => {
                         window.location.href = 'admin.html';
@@ -249,16 +245,12 @@
                 showMessage('Something went wrong. Please try again.', 'danger');
                 console.error('Login error:', err);
             } finally {
-                // Reset button state
                 btnText.classList.remove('d-none');
                 btnSpinner.classList.add('d-none');
                 loginBtn.disabled = false;
             }
         });
 
-        // ============================================================
-        //  ENTER KEY SUPPORT
-        // ============================================================
         passwordInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 form.dispatchEvent(new Event('submit'));
