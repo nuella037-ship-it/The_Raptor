@@ -386,6 +386,11 @@
                         <i class="fas fa-envelope"></i> Subscribers
                     </button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">
+                        <i class="fas fa-comments"></i> Comments <span id="pendingBadge" class="unread-badge ms-1" style="display:none;">0</span>
+                    </button>
+                </li>
             </ul>
 
             <div class="tab-content" id="adminTabContent">
@@ -485,6 +490,24 @@
                         </div>
                         <div id="adminSubscriberList" class="list-group">
                             <div class="text-muted">Loading subscribers...</div>
+                        </div>
+                    </div>
+                </div>
+               
+               <!-- ===== TAB 4: COMMENTS ===== -->
+                <div class="tab-pane fade" id="comments" role="tabpanel">
+                    <div class="card dashboard-card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                            <h4 class="fw-bold mb-0"><i class="fas fa-comments text-green"></i> Manage Comments</h4>
+                            <div>
+                                <span class="text-muted me-2" id="commentStats">0 total · 0 pending</span>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteAllComments()">
+                                    <i class="fas fa-trash"></i> Delete all
+                                </button>
+                            </div>
+                        </div>
+                        <div id="adminCommentList" class="list-group">
+                            <div class="text-muted">Loading comments...</div>
                         </div>
                     </div>
                 </div>
@@ -1047,7 +1070,21 @@
                     .from('newsletter_subscribers')
                     .select('*', { count: 'exact', head: true });
                 document.getElementById('totalSubscribers').textContent = subscriberCount || 0;
+        // Pending comments count (for the badge on Comments tab)
+        const { count: pendingCount } = await supabaseClient
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_approved', false);
 
+        const pendingBadge = document.getElementById('pendingBadge');
+        if (pendingBadge) {
+            if (pendingCount > 0) {
+                pendingBadge.textContent = pendingCount;
+                pendingBadge.style.display = 'inline';
+            } else {
+                pendingBadge.style.display = 'none';
+            }
+        }
             } catch (err) {
                 console.error('Stats error:', err);
             }
