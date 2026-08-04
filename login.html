@@ -1,267 +1,695 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login – The Raptor Admin</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #1a5276 0%, #1e8449 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-        .login-container {
-            max-width: 420px;
-            width: 100%;
-            background: #fff;
-            border-radius: 20px;
-            padding: 2.5rem 2rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .login-logo {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        .login-logo h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #1a5276;
-        }
-        .login-logo h1 span {
-            color: #1e8449;
-        }
-        .login-logo p {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-top: 0.3rem;
-        }
-        .form-control {
-            border-radius: 12px;
-            padding: 0.75rem 1rem;
-            border: 2px solid #e9ecef;
-            transition: border-color 0.3s;
-        }
-        .form-control:focus {
-            border-color: #1a5276;
-            box-shadow: none;
-        }
-        .btn-login {
-            background: #1a5276;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem;
-            font-weight: 600;
-            width: 100%;
-            transition: background 0.3s;
-        }
-        .btn-login:hover {
-            background: #2e86c1;
-            color: #fff;
-        }
-        .btn-login:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        .alert {
-            border-radius: 12px;
-        }
-        .footer-text {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-        .footer-text a {
-            color: #1a5276;
-            text-decoration: none;
-        }
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-        .password-toggle {
-            position: relative;
-        }
-        .password-toggle .toggle-btn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #6c757d;
-            cursor: pointer;
-            padding: 0.25rem;
-        }
-        .password-toggle .toggle-btn:hover {
-            color: #1a5276;
-        }
-    </style>
-</head>
-<body>
+<script>
+    // ============================================================
+    //  SUPABASE CONFIG (session stored in sessionStorage)
+    // ============================================================
+    const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
 
-    <div class="login-container">
-        <div class="login-logo">
-            <h1>The<span>Raptor</span></h1>
-            <p>Admin Login</p>
-        </div>
-
-        <div id="loginMessage" class="alert d-none" role="alert"></div>
-
-        <form id="loginForm" novalidate>
-            <div class="mb-3">
-                <label for="loginEmail" class="form-label fw-semibold">Email Address</label>
-                <input type="email" id="loginEmail" class="form-control" placeholder="admin@theraptor.com" required />
-            </div>
-            <div class="mb-3 password-toggle">
-                <label for="loginPassword" class="form-label fw-semibold">Password</label>
-                <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required />
-                <button type="button" class="toggle-btn" id="togglePassword" aria-label="Toggle password visibility">
-                    <i class="fas fa-eye"></i>
-                </button>
-            </div>
-            <button type="submit" class="btn-login" id="loginBtn">
-                <span id="loginBtnText"><i class="fas fa-lock"></i> Sign In</span>
-                <span id="loginBtnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-            </button>
-        </form>
-
-        <div class="footer-text">
-            <a href="index.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
-        </div>
-    </div>
-
-    <script>
-        // ============================================================
-        //  SUPABASE CONFIG (session stored in sessionStorage)
-        // ============================================================
-        const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: {
-                persistSession: true,
-                storage: window.sessionStorage   // session cleared on tab close
-            }
-        });
-
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
-        const form = document.getElementById('loginForm');
-        const emailInput = document.getElementById('loginEmail');
-        const passwordInput = document.getElementById('loginPassword');
-        const loginBtn = document.getElementById('loginBtn');
-        const btnText = document.getElementById('loginBtnText');
-        const btnSpinner = document.getElementById('loginBtnSpinner');
-        const messageEl = document.getElementById('loginMessage');
-        const toggleBtn = document.getElementById('togglePassword');
-
-        // ============================================================
-        //  TOGGLE PASSWORD VISIBILITY
-        // ============================================================
-        toggleBtn.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            this.querySelector('i').classList.toggle('fa-eye');
-            this.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-
-        // ============================================================
-        //  SHOW MESSAGE HELPER
-        // ============================================================
-        function showMessage(message, type = 'danger') {
-            messageEl.textContent = message;
-            messageEl.className = `alert alert-${type} d-block`;
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+            persistSession: true,
+            storage: window.sessionStorage
         }
+    });
+    window.supabaseClient = supabaseClient;
 
-        function hideMessage() {
-            messageEl.className = 'alert d-none';
-        }
-
-        // ============================================================
-        //  CHECK IF ALREADY LOGGED IN
-        // ============================================================
-        async function checkSession() {
+    // ============================================================
+    //  CHECK AUTHENTICATION & UPDATE UI (with retry)
+    // ============================================================
+    async function checkAuth(attempts = 3) {
+        for (let attempt = 1; attempt <= attempts; attempt++) {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-                window.location.href = 'admin.html';
+                const userInfo = document.getElementById('userInfo');
+                const userEmail = document.getElementById('userEmail');
+                const logoutBtn = document.getElementById('logoutBtn');
+
+                if (userInfo) userInfo.style.display = 'inline';
+                if (userEmail) userEmail.textContent = session.user.email || 'Admin';
+                if (logoutBtn) logoutBtn.style.display = 'inline-block';
+
+                return session;
+            }
+            // Wait 300ms before retrying
+            if (attempt < attempts) {
+                await new Promise(resolve => setTimeout(resolve, 300));
             }
         }
-        checkSession();
+        // No session after all attempts – redirect to login
+        window.location.href = 'login.html';
+        return null;
+    }
 
-        // ============================================================
-        //  LOGIN FORM SUBMIT
-        // ============================================================
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            hideMessage();
+    // ============================================================
+    //  LOGOUT FUNCTION
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', async function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    const { error } = await supabaseClient.auth.signOut();
+                    if (error) {
+                        showToast('Logout failed: ' + error.message, 'error');
+                    } else {
+                        window.location.href = 'login.html';
+                    }
+                }
+            });
+        }
+    });
 
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
+    // ============================================================
+    //  DARK MODE TOGGLE
+    // ============================================================
+    (function initDarkMode() {
+        const toggle = document.getElementById('darkModeToggle');
+        if (!toggle) return;
+        const saved = localStorage.getItem('darkMode');
+        if (saved === 'true') {
+            document.body.classList.add('dark-mode');
+            toggle.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+        toggle.addEventListener('click', function() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            this.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('darkMode', isDark);
+        });
+    })();
 
-            if (!email || !password) {
-                showMessage('Please enter both email and password.', 'warning');
+    // ============================================================
+    //  LOAD ALL DATA
+    // ============================================================
+    async function loadAllAdminData() {
+        await Promise.all([
+            loadAdminArticles(),
+            loadAdminMessages(),
+            loadAdminSubscribers(),
+            loadAdminComments(),
+            updateStats()
+        ]);
+    }
+
+    // ============================================================
+    //  ARTICLES
+    // ============================================================
+    async function loadAdminArticles() {
+        const container = document.getElementById('adminArticleList');
+        if (!container) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('articles')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="text-muted">No articles yet. Add one above.</div>';
                 return;
             }
 
-            btnText.classList.add('d-none');
-            btnSpinner.classList.remove('d-none');
-            loginBtn.disabled = true;
+            let html = '';
+            data.forEach(article => {
+                const excerpt = article.excerpt || (article.content ? article.content.substring(0, 100) + '…' : '');
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <strong>${article.title}</strong>
+                                <span class="badge bg-primary">${article.category}</span>
+                            </div>
+                            <div class="text-muted small">
+                                ${article.author || 'Editor'} • ${article.date || new Date(article.created_at).toLocaleDateString()}
+                                ${article.readTime ? ` • ${article.readTime}` : ''}
+                            </div>
+                            <div class="text-muted small mt-1">${excerpt}</div>
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            <a href="blog.html?id=${article.id}" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="fas fa-eye"></i></a>
+                            <button class="btn btn-sm btn-outline-primary" onclick="editArticle('${article.id}')"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteArticle('${article.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Failed to load articles:', err);
+            container.innerHTML = '<div class="text-danger">Error loading articles.</div>';
+        }
+    }
+
+    window.deleteArticle = async function(id) {
+        if (!confirm('Delete this article permanently?')) return;
+        try {
+            const { error } = await supabaseClient.from('articles').delete().eq('id', id);
+            if (error) throw error;
+            showToast('Article deleted.', 'success');
+            loadAllAdminData();
+        } catch (err) {
+            showToast('Failed to delete: ' + err.message, 'error');
+        }
+    };
+
+    window.editArticle = async function(id) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('articles')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (error) throw error;
+
+            document.getElementById('editArticleId').value = data.id;
+            document.getElementById('articleTitle').value = data.title;
+            document.getElementById('articleCategory').value = data.category;
+            document.getElementById('articleContent').value = data.content;
+            document.getElementById('articleAuthor').value = data.author || '';
+            document.getElementById('articleDate').value = data.date || '';
+            document.getElementById('articleImage').value = data.image || '';
+            document.getElementById('articleTags').value = (data.tags || []).join(', ');
+            document.getElementById('articleReadTime').value = data.readTime || '';
+
+            document.getElementById('formTitle').innerHTML = '<i class="fas fa-edit text-green"></i> Edit Article';
+            document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Update Article';
+            document.getElementById('formCancelBtn').classList.remove('d-none');
+            document.getElementById('formStatus').textContent = 'Editing...';
+            document.querySelector('#articles .card:first-child').scrollIntoView({ behavior: 'smooth' });
+        } catch (err) {
+            showToast('Failed to load article: ' + err.message, 'error');
+        }
+    };
+
+    document.getElementById('formCancelBtn')?.addEventListener('click', function() {
+        resetForm();
+    });
+
+    function resetForm() {
+        document.getElementById('editArticleId').value = '';
+        document.getElementById('articleForm').reset();
+        document.getElementById('formTitle').innerHTML = '<i class="fas fa-plus-circle text-green"></i> Add New Article';
+        document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-plus"></i> Add Article';
+        document.getElementById('formCancelBtn').classList.add('d-none');
+        document.getElementById('formStatus').textContent = '';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('articleForm');
+        if (!form) return;
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('formSubmitBtn');
+            const status = document.getElementById('formStatus');
+            submitBtn.disabled = true;
+            status.textContent = 'Saving...';
+
+            const id = document.getElementById('editArticleId').value;
+            const title = document.getElementById('articleTitle').value.trim();
+            const category = document.getElementById('articleCategory').value.trim();
+            const content = document.getElementById('articleContent').value.trim();
+            const author = document.getElementById('articleAuthor').value.trim();
+            const date = document.getElementById('articleDate').value || new Date().toISOString().split('T')[0];
+            const image = document.getElementById('articleImage').value.trim() || null;
+            const tagsRaw = document.getElementById('articleTags').value.trim();
+            const tags = tagsRaw ? tagsRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const readTime = document.getElementById('articleReadTime').value.trim() || '4 min read';
+
+            if (!title || !category || !content || !author) {
+                showToast('Please fill in all required fields.', 'error');
+                submitBtn.disabled = false;
+                status.textContent = '';
+                return;
+            }
+
+            const excerpt = content.substring(0, 160) + '…';
 
             try {
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-                if (error) {
-                    if (error.message === 'Invalid login credentials') {
-                        showMessage('Invalid email or password. Please try again.', 'danger');
-                    } else if (error.message.includes('Email not confirmed')) {
-                        showMessage('Please confirm your email before logging in.', 'warning');
-                    } else {
-                        showMessage('Login failed: ' + error.message, 'danger');
-                    }
-                    return;
+                let result;
+                if (id) {
+                    result = await supabaseClient
+                        .from('articles')
+                        .update({
+                            title, category, content, author, date, image, tags, readTime, excerpt
+                        })
+                        .eq('id', id)
+                        .select();
+                } else {
+                    result = await supabaseClient
+                        .from('articles')
+                        .insert([{
+                            title, category, content, author, date, image, tags, readTime, excerpt,
+                            comments: 0, shares: 0
+                        }])
+                        .select();
                 }
 
-                if (data.session) {
-                    showMessage('Login successful! Redirecting...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'admin.html';
-                    }, 800);
-                }
+                if (result.error) throw result.error;
 
+                showToast(id ? 'Article updated!' : 'Article published!', 'success');
+                resetForm();
+                loadAllAdminData();
+                status.textContent = id ? '✅ Updated!' : '✅ Added!';
+                setTimeout(() => status.textContent = '', 3000);
             } catch (err) {
-                showMessage('Something went wrong. Please try again.', 'danger');
-                console.error('Login error:', err);
+                showToast('Failed: ' + err.message, 'error');
+                status.textContent = '❌ Error';
             } finally {
-                btnText.classList.remove('d-none');
-                btnSpinner.classList.add('d-none');
-                loginBtn.disabled = false;
+                submitBtn.disabled = false;
             }
         });
+    });
 
-        passwordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                form.dispatchEvent(new Event('submit'));
-            }
-        });
-        emailInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                passwordInput.focus();
-            }
-        });
-    </script>
+    // ============================================================
+    //  MESSAGES
+    // ============================================================
+    async function loadAdminMessages() {
+        const container = document.getElementById('adminMessageList');
+        if (!container) return;
 
-</body>
-</html>
+        try {
+            const { data, error } = await supabaseClient
+                .from('contact_messages')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No messages yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.forEach(msg => {
+                const isUnread = !msg.is_read;
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start ${isUnread ? 'border-left-danger' : ''}" style="${isUnread ? 'border-left-color: #dc3545;' : ''}">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <strong>${msg.name}</strong>
+                                <span class="badge bg-primary">${msg.subject || 'General'}</span>
+                                ${isUnread ? '<span class="unread-badge">Unread</span>' : ''}
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fas fa-envelope"></i> ${msg.email}
+                                ${msg.phone ? `• <i class="fas fa-phone"></i> ${msg.phone}` : ''}
+                                • ${new Date(msg.created_at).toLocaleString()}
+                            </div>
+                            <div class="message-preview text-muted small mt-1">${msg.message}</div>
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            ${isUnread ? `<button class="btn btn-sm btn-outline-success" onclick="markMessageRead('${msg.id}')"><i class="fas fa-check"></i></button>` : ''}
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteMessage('${msg.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Failed to load messages:', err);
+            container.innerHTML = '<div class="text-danger">Error loading messages.</div>';
+        }
+    }
+
+    window.markMessageRead = async function(id) {
+        try {
+            const { error } = await supabaseClient
+                .from('contact_messages')
+                .update({ is_read: true })
+                .eq('id', id);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('Marked as read.', 'success');
+        } catch (err) {
+            showToast('Failed to update: ' + err.message, 'error');
+        }
+    };
+
+    window.markAllRead = async function() {
+        if (!confirm('Mark all messages as read?')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('contact_messages')
+                .update({ is_read: true })
+                .eq('is_read', false);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('All messages marked as read.', 'success');
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    };
+
+    window.deleteMessage = async function(id) {
+        if (!confirm('Delete this message?')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('contact_messages')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('Message deleted.', 'success');
+        } catch (err) {
+            showToast('Failed to delete: ' + err.message, 'error');
+        }
+    };
+
+    window.deleteAllMessages = async function() {
+        if (!confirm('Delete ALL messages? This cannot be undone.')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('contact_messages')
+                .delete()
+                .neq('id', 0);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('All messages deleted.', 'success');
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    };
+
+    // ============================================================
+    //  SUBSCRIBERS
+    // ============================================================
+    async function loadAdminSubscribers() {
+        const container = document.getElementById('adminSubscriberList');
+        if (!container) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('newsletter_subscribers')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-envelope"></i>
+                        <p>No subscribers yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            data.forEach(sub => {
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${sub.email}</strong>
+                            <span class="badge bg-green">${sub.frequency || 'daily'}</span>
+                            <br /><small class="text-muted">Subscribed: ${new Date(sub.created_at).toLocaleString()}</small>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSubscriber('${sub.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Failed to load subscribers:', err);
+            container.innerHTML = '<div class="text-danger">Error loading subscribers.</div>';
+        }
+    }
+
+    window.deleteSubscriber = async function(id) {
+        if (!confirm('Remove this subscriber?')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('newsletter_subscribers')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('Subscriber removed.', 'success');
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    };
+
+    window.deleteAllSubscribers = async function() {
+        if (!confirm('Delete ALL subscribers? This cannot be undone.')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('newsletter_subscribers')
+                .delete()
+                .neq('id', 0);
+            if (error) throw error;
+            loadAllAdminData();
+            showToast('All subscribers deleted.', 'success');
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    };
+
+    window.exportSubscribers = async function() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('newsletter_subscribers')
+                .select('email, frequency, created_at')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                showToast('No subscribers to export.', 'error');
+                return;
+            }
+
+            let csv = 'Email,Frequency,Subscribed At\n';
+            data.forEach(row => {
+                csv += `"${row.email}","${row.frequency || 'daily'}","${new Date(row.created_at).toLocaleString()}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `subscribers_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Export successful!', 'success');
+        } catch (err) {
+            showToast('Failed to export: ' + err.message, 'error');
+        }
+    };
+
+    // ============================================================
+    //  COMMENTS - ADMIN
+    // ============================================================
+    async function loadAdminComments() {
+        const container = document.getElementById('adminCommentList');
+        if (!container) return;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('comments')
+                .select('*, articles(title)')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-comments"></i><p>No comments yet.</p></div>`;
+                return;
+            }
+
+            const total = data.length;
+            const pending = data.filter(c => !c.is_approved).length;
+            document.getElementById('commentStats').textContent = `${total} total · ${pending} pending`;
+
+            const badge = document.getElementById('pendingBadge');
+            if (pending > 0) {
+                badge.textContent = pending;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            let html = '';
+            data.forEach(c => {
+                const isPending = !c.is_approved;
+                html += `
+                    <div class="list-group-item d-flex justify-content-between align-items-start ${isPending ? 'border-left-warning' : ''}" style="${isPending ? 'border-left-color: #ffc107;' : ''}">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <strong>${c.author}</strong>
+                                <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">${isPending ? 'Pending' : 'Approved'}</span>
+                                <span class="badge bg-secondary">${c.articles?.title || 'Unknown article'}</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fas fa-envelope"></i> ${c.email || 'No email'} • ${new Date(c.created_at).toLocaleString()}
+                            </div>
+                            <div class="mt-1">${c.content}</div>
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            ${isPending ? `<button class="btn btn-sm btn-outline-success" onclick="approveComment('${c.id}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${c.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error('Failed to load comments:', err);
+            container.innerHTML = '<div class="text-danger">Error loading comments.</div>';
+        }
+    }
+
+    window.approveComment = async function(id) {
+        if (!confirm('Approve this comment?')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('comments')
+                .update({ is_approved: true })
+                .eq('id', id);
+            if (error) throw error;
+            showToast('Comment approved.', 'success');
+            loadAdminComments();
+            updateStats();
+        } catch (err) {
+            showToast('Failed to approve: ' + err.message, 'error');
+        }
+    };
+
+    window.deleteComment = async function(id) {
+        if (!confirm('Delete this comment permanently?')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('comments')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            showToast('Comment deleted.', 'success');
+            loadAdminComments();
+            updateStats();
+        } catch (err) {
+            showToast('Failed to delete: ' + err.message, 'error');
+        }
+    };
+
+    window.deleteAllComments = async function() {
+        if (!confirm('Delete ALL comments? This cannot be undone.')) return;
+        try {
+            const { error } = await supabaseClient
+                .from('comments')
+                .delete()
+                .neq('id', 0);
+            if (error) throw error;
+            showToast('All comments deleted.', 'success');
+            loadAdminComments();
+            updateStats();
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        }
+    };
+
+    // ============================================================
+    //  STATS
+    // ============================================================
+    async function updateStats() {
+        try {
+            const { count: articleCount } = await supabaseClient
+                .from('articles')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalArticles').textContent = articleCount || 0;
+
+            const { count: messageCount } = await supabaseClient
+                .from('contact_messages')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalMessages').textContent = messageCount || 0;
+
+            const { count: unreadCount } = await supabaseClient
+                .from('contact_messages')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_read', false);
+            document.getElementById('unreadMessages').textContent = unreadCount || 0;
+
+            const badge = document.getElementById('unreadBadge');
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            const { count: subscriberCount } = await supabaseClient
+                .from('newsletter_subscribers')
+                .select('*', { count: 'exact', head: true });
+            document.getElementById('totalSubscribers').textContent = subscriberCount || 0;
+
+            const { count: pendingCount } = await supabaseClient
+                .from('comments')
+                .select('*', { count: 'exact', head: true })
+                .eq('is_approved', false);
+
+            const pendingBadge = document.getElementById('pendingBadge');
+            if (pendingBadge) {
+                if (pendingCount > 0) {
+                    pendingBadge.textContent = pendingCount;
+                    pendingBadge.style.display = 'inline';
+                } else {
+                    pendingBadge.style.display = 'none';
+                }
+            }
+        } catch (err) {
+            console.error('Stats error:', err);
+        }
+    }
+
+    // ============================================================
+    //  TOAST NOTIFICATIONS
+    // ============================================================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toastMessage');
+        toast.textContent = message;
+        toast.className = 'toast';
+        if (type === 'error') toast.classList.add('error');
+        toast.style.display = 'block';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+            toast.style.display = 'none';
+        }, 4000);
+    }
+
+    // ============================================================
+    //  INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Wait a moment for session to be available, then check
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const session = await checkAuth(3); // retry up to 3 times
+        if (!session) return;
+
+        await loadAllAdminData();
+
+        document.querySelector('[data-bs-target="#messages"]')?.addEventListener('click', function() {
+            loadAdminMessages();
+            updateStats();
+        });
+        document.querySelector('[data-bs-target="#subscribers"]')?.addEventListener('click', function() {
+            loadAdminSubscribers();
+            updateStats();
+        });
+        document.querySelector('[data-bs-target="#articles"]')?.addEventListener('click', function() {
+            loadAdminArticles();
+        });
+        document.querySelector('[data-bs-target="#comments"]')?.addEventListener('click', function() {
+            loadAdminComments();
+            updateStats();
+        });
+    });
+</script>
