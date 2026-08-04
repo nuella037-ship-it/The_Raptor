@@ -529,16 +529,20 @@
          ============================================================ -->
     <script>
         // ============================================================
-        //  SUPABASE CONFIG
+        //  SUPABASE CONFIG (session not persisted)
         // ============================================================
         const SUPABASE_URL = "https://aslkopamkdnvofjqzgjz.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_yZ8KyiOxJT3GBR_6wX1Plw_Yt_5IQ6f";
 
-        // Initialize Supabase client
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase client with no session persistence
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: {
+                persistSession: false   // session only in memory; closing page requires re-login
+            }
+        });
         window.supabaseClient = supabaseClient;
 
-      // ============================================================
+        // ============================================================
         //  CHECK AUTHENTICATION & UPDATE UI
         // ============================================================
         async function checkAuth() {
@@ -1034,6 +1038,120 @@
         };
 
         // ============================================================
+        //  COMMENTS - ADMIN
+        // ============================================================
+        async function loadAdminComments() {
+            const container = document.getElementById('adminCommentList');
+            if (!container) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('comments')
+                    .select('*, articles(title)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fas fa-comments"></i><p>No comments yet.</p></div>`;
+                    return;
+                }
+
+                const total = data.length;
+                const pending = data.filter(c => !c.is_approved).length;
+                document.getElementById('commentStats').textContent = `${total} total · ${pending} pending`;
+
+                // Update pending badge
+                const badge = document.getElementById('pendingBadge');
+                if (pending > 0) {
+                    badge.textContent = pending;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                let html = '';
+                data.forEach(c => {
+                    const isPending = !c.is_approved;
+                    html += `
+                        <div class="list-group-item d-flex justify-content-between align-items-start ${isPending ? 'border-left-warning' : ''}" style="${isPending ? 'border-left-color: #ffc107;' : ''}">
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <strong>${c.author}</strong>
+                                    <span class="badge ${isPending ? 'bg-warning text-dark' : 'bg-success'}">${isPending ? 'Pending' : 'Approved'}</span>
+                                    <span class="badge bg-secondary">${c.articles?.title || 'Unknown article'}</span>
+                                </div>
+                                <div class="text-muted small">
+                                    <i class="fas fa-envelope"></i> ${c.email || 'No email'} • ${new Date(c.created_at).toLocaleString()}
+                                </div>
+                                <div class="mt-1">${c.content}</div>
+                            </div>
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                ${isPending ? `<button class="btn btn-sm btn-outline-success" onclick="approveComment('${c.id}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteComment('${c.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } catch (err) {
+                console.error('Failed to load comments:', err);
+                container.innerHTML = '<div class="text-danger">Error loading comments.</div>';
+            }
+        }
+
+        // Approve a comment
+        window.approveComment = async function(id) {
+            if (!confirm('Approve this comment?')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('comments')
+                    .update({ is_approved: true })
+                    .eq('id', id);
+                if (error) throw error;
+                showToast('Comment approved.', 'success');
+                loadAdminComments();
+                updateStats();
+            } catch (err) {
+                showToast('Failed to approve: ' + err.message, 'error');
+            }
+        };
+
+        // Delete a comment (from admin)
+        window.deleteComment = async function(id) {
+            if (!confirm('Delete this comment permanently?')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('comments')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
+                showToast('Comment deleted.', 'success');
+                loadAdminComments();
+                updateStats();
+            } catch (err) {
+                showToast('Failed to delete: ' + err.message, 'error');
+            }
+        };
+
+        // Delete all comments
+        window.deleteAllComments = async function() {
+            if (!confirm('Delete ALL comments? This cannot be undone.')) return;
+            try {
+                const { error } = await supabaseClient
+                    .from('comments')
+                    .delete()
+                    .neq('id', 0);
+                if (error) throw error;
+                showToast('All comments deleted.', 'success');
+                loadAdminComments();
+                updateStats();
+            } catch (err) {
+                showToast('Failed: ' + err.message, 'error');
+            }
+        };
+
+        // ============================================================
         //  STATS
         // ============================================================
         async function updateStats() {
@@ -1071,21 +1189,22 @@
                     .from('newsletter_subscribers')
                     .select('*', { count: 'exact', head: true });
                 document.getElementById('totalSubscribers').textContent = subscriberCount || 0;
-        // Pending comments count (for the badge on Comments tab)
-        const { count: pendingCount } = await supabaseClient
-            .from('comments')
-            .select('*', { count: 'exact', head: true })
-            .eq('is_approved', false);
 
-        const pendingBadge = document.getElementById('pendingBadge');
-        if (pendingBadge) {
-            if (pendingCount > 0) {
-                pendingBadge.textContent = pendingCount;
-                pendingBadge.style.display = 'inline';
-            } else {
-                pendingBadge.style.display = 'none';
-            }
-        }
+                // Pending comments count (for the badge on Comments tab)
+                const { count: pendingCount } = await supabaseClient
+                    .from('comments')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_approved', false);
+
+                const pendingBadge = document.getElementById('pendingBadge');
+                if (pendingBadge) {
+                    if (pendingCount > 0) {
+                        pendingBadge.textContent = pendingCount;
+                        pendingBadge.style.display = 'inline';
+                    } else {
+                        pendingBadge.style.display = 'none';
+                    }
+                }
             } catch (err) {
                 console.error('Stats error:', err);
             }
@@ -1126,7 +1245,7 @@
             document.querySelector('[data-bs-target="#articles"]')?.addEventListener('click', function() {
                 loadAdminArticles();
             });
-            
+
             // Auto-refresh comments tab when clicked
             document.querySelector('[data-bs-target="#comments"]')?.addEventListener('click', function() {
                 loadAdminComments();
